@@ -166,12 +166,23 @@ class UI:
 
         self.multipleCommandsHelp = ft.Markdown(const.MULTIPLE_COMMAND_VARIANTS_HELP_LABEL, selectable=True,
                                                 extension_set=const.MARKDOWN_EXTENSION_SET,
-                                                code_theme=const.MARKDOWN_CODE_THEME, )
+                                                code_theme=const.MARKDOWN_CODE_THEME)
+        self.multipleCommandsHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
 
         self.customCommandsHelp = ft.Markdown(const.CUSTOM_COMMANDS_HELP_LABEL, selectable=True,
                                               extension_set=const.MARKDOWN_EXTENSION_SET,
-                                              code_theme=const.MARKDOWN_CODE_THEME, )
+                                              code_theme=const.MARKDOWN_CODE_THEME)
         self.customCommandsHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
+
+        self.conntactUsHelp = ft.Markdown(const.CONTACT_US_LABEL, selectable=True,
+                                              extension_set=const.MARKDOWN_EXTENSION_SET,
+                                              code_theme=const.MARKDOWN_CODE_THEME)
+        self.conntactUsHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
+
+        self.madeByHelp = ft.Markdown(const.DEVELOPED_BY_LABEL, selectable=True,
+                                      extension_set=const.MARKDOWN_EXTENSION_SET,
+                                      code_theme=const.MARKDOWN_CODE_THEME)
+        self.madeByHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
 
         self.infoMenuDivider = ft.Divider(height=1, thickness=2)
 
@@ -183,7 +194,7 @@ class UI:
         self.nameCol = ft.Column(spacing=10, controls=[self.nameT, self.nameTlow, self.statusIcon])
         self.infoMenu.content = ft.Column(
             controls=[self.infoHeader, self.infoTable, self.infoMenuDivider, self.multipleCommandsHelp,
-                      self.infoMenuDivider, self.customCommandsHelp], scroll=const.SCROLL_MODE_AUTO)
+                      self.infoMenuDivider, self.customCommandsHelp, self.infoMenuDivider, self.conntactUsHelp, self.madeByHelp], scroll=const.SCROLL_MODE_AUTO)
         self.msgs = list()
         self.msgsCol = ft.Column(controls=self.msgs, scroll=const.SCROLL_MODE_AUTO)
         self.msgsBox = ft.Container(content=self.msgsCol, width=420, height=420)

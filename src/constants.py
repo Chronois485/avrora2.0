@@ -225,6 +225,8 @@ NEWS_HEADERS_COUNT_LABEL = "Кількість заголовків:"
 SETTINGS_GROUP_PERSONALISATION_LABEL = "Персоналізація:"
 THEME_SWITCH_LABEL = "Темна тема"
 ACCENT_COLOR_LABEL = "Акцентний колір"
+DEVELOPED_BY_LABEL = "#### Розроблено CHRONOiS"
+CONTACT_US_LABEL = "#### Якщо виникнуть якісь питання звяжіться з нами за допомогою телеграму: https://t.me/Chronos4"
 
 CUSTOM_COMMANDS_HELP_LABEL = """
 ### Як додати власні команди:
