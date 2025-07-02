@@ -194,7 +194,7 @@ class UI:
         self.nameCol = ft.Column(spacing=10, controls=[self.nameT, self.nameTlow, self.statusIcon])
         self.infoMenu.content = ft.Column(
             controls=[self.infoHeader, self.infoTable, self.infoMenuDivider, self.multipleCommandsHelp,
-                      self.infoMenuDivider, self.customCommandsHelp, self.infoMenuDivider, self.conntactUsHelp, self.madeByHelp], scroll=const.SCROLL_MODE_AUTO)
+                      self.infoMenuDivider, self.customCommandsHelp, self.infoMenuDivider, self.conntactUsHelp, self.infoMenuDivider,self.madeByHelp], scroll=const.SCROLL_MODE_AUTO)
         self.msgs = list()
         self.msgsCol = ft.Column(controls=self.msgs, scroll=const.SCROLL_MODE_AUTO)
         self.msgsBox = ft.Container(content=self.msgsCol, width=420, height=420)
