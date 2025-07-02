@@ -1,6 +1,7 @@
 import os
 import sys
 import tempfile
+
 import flet as ft
 
 # Base Colors (used for themes)
@@ -13,38 +14,19 @@ INITIONAL_COLOR = ft.Colors.SURFACE_CONTAINER_HIGHEST
 THEME_DARK = "dark"
 THEME_LIGHT = "light"
 
-COLORS_DARK = {
-    "BGCOLOR": "#2f0c3d",
-    "MAINBGCOLOR": "#151218",
-    "MAINCOLOR": ft.Colors.PURPLE_300,
-    "ICON_COLOR": ft.Colors.PURPLE_300,
-}
+COLORS_DARK = {"BGCOLOR": "#2f0c3d", "MAINBGCOLOR": "#151218", "MAINCOLOR": ft.Colors.PURPLE_300,
+               "ICON_COLOR": ft.Colors.PURPLE_300, }
 
-COLORS_LIGHT = {
-    "BGCOLOR": "#f3e5f5",
-    "MAINBGCOLOR": "#fafafa",
-    "MAINCOLOR": ft.Colors.DEEP_PURPLE_400,
-    "ICON_COLOR": ft.Colors.PURPLE_600,
-}
+COLORS_LIGHT = {"BGCOLOR": "#f3e5f5", "MAINBGCOLOR": "#fafafa", "MAINCOLOR": ft.Colors.DEEP_PURPLE_400,
+                "ICON_COLOR": ft.Colors.PURPLE_600, }
 
-ACCENT_COLORS = {
-    "Deep Purple": ft.Colors.DEEP_PURPLE_400,
-    "Indigo": ft.Colors.INDIGO_400,
-    "Blue": ft.Colors.BLUE_400,
-    "Teal": ft.Colors.TEAL_400,
-    "Green": ft.Colors.GREEN_400,
-    "Orange": ft.Colors.ORANGE_400,
-    "Pink": ft.Colors.PINK_400,
-}
+ACCENT_COLORS = {"Deep Purple": ft.Colors.DEEP_PURPLE_400, "Indigo": ft.Colors.INDIGO_400, "Blue": ft.Colors.BLUE_400,
+                 "Teal": ft.Colors.TEAL_400, "Green": ft.Colors.GREEN_400, "Orange": ft.Colors.ORANGE_400,
+                 "Pink": ft.Colors.PINK_400, }
 
-CHAT_FALLBACK_COLORS = {
-    "user_bubble": ft.Colors.BLUE_200,
-    "user_text": ft.Colors.BLACK,
-    "bot_bubble": ft.Colors.GREY_300,
-    "bot_text": ft.Colors.BLACK,
-    "system_bubble": ft.Colors.AMBER_100,
-    "system_text": ft.Colors.BLACK
-}
+CHAT_FALLBACK_COLORS = {"user_bubble": ft.Colors.BLUE_200, "user_text": ft.Colors.BLACK,
+                        "bot_bubble": ft.Colors.GREY_300, "bot_text": ft.Colors.BLACK,
+                        "system_bubble": ft.Colors.AMBER_100, "system_text": ft.Colors.BLACK}
 
 # Logging
 LOG_FILENAME = "avrora.log"
@@ -65,146 +47,68 @@ STATUS_LISTENING = "listening"
 STATUS_SPEAKING = "speaking"
 STATUS_NONE = "none"
 
-
 # Audio Settings
 PAUSE_THRESHOLD = 0.8  # секунди тиші, після яких фраза вважається завершеною
 LANGUAGE = "uk-UA"
 TTS_LANGUAGE = "uk"
 
 # Weather Descriptions Translation
-WEATHER_DESCRIPTIONS_UK = {
-    "sunny": "ясно",
-    "partly cloudy": "частково хмарно",
-    "cloudy": "хмарно",
-    "overcast": "похмуро",
-    "light rain": "невеликий дощ",
-    "moderate rain": "помірний дощ",
-    "heavy rain": "сильний дощ",
-    "thunderstorm": "гроза",
-    "snow": "сніг",
-    "light snow": "невеликий сніг",
-    "moderate snow": "помірний сніг",
-    "heavy snow": "сильний сніг",
-    "sleet": "мокрий сніг",
-    "fog": "туман",
-    "mist": "мряка",
-    "haze": "димка",
-    "drizzle": "мряка",
-    "freezing rain": "крижаний дощ",
-    "ice pellets": "крижана крупа",
-    "flurries": "снігові заряди",
-    "showers": "зливи",
-    "scattered showers": "розсіяні зливи",
-    "broken clouds": "розбиті хмари",
-    "few clouds": "мало хмар",
-    "light drizzle": "легка мряка",
-    "heavy drizzle": "сильна мряка",
-    "rain and drizzle": "дощ та мряка",
-    "light freezing rain": "легкий крижаний дощ",
-    "heavy freezing rain": "сильний крижаний дощ",
-    "light snow showers": "легкі снігові зливи",
-    "heavy snow showers": "сильні снігові зливи",
-    "light rain showers": "легкі дощові зливи",
-    "heavy rain showers": "сильні дощові зливи",
-    "light thunderstorm": "легка гроза",
-    "heavy thunderstorm": "сильна гроза",
-    "thunderstorm with light rain": "гроза з невеликим дощем",
-    "thunderstorm with heavy rain": "гроза з сильним дощем",
-    "thunderstorm with rain": "гроза з дощем",
-    "thunderstorm with light drizzle": "гроза з легкою мрякою",
-    "thunderstorm with heavy drizzle": "гроза з сильною мрякою",
-    "thunderstorm with drizzle": "гроза з мрякою",
-    "squalls": "шквали",
-    "tornado": "торнадо",
-    "dust": "пил",
-    "sand": "пісок",
-    "volcanic ash": "вулканічний попіл",
-    "smoke": "дим",
-    "hail": "град",
-    "windy": "вітряно",
-    "cold": "холодно",
-    "hot": "спекотно",
-    "calm": "безвітряно",
-    "breezy": "легкий вітерець",
-    "gale": "шторм",
-    "storm": "шторм",
-    "hurricane": "ураган",
-    "tropical storm": "тропічний шторм",
-    "blizzard": "хуртовина",
-    "freezing fog": "крижаний туман",
-    "widespread dust": "розповсюджений пил",
-    "sandstorm": "піщана буря",
-    "light rain and snow": "невеликий дощ зі снігом",
-    "rain and snow": "дощ зі снігом",
-    "heavy rain and snow": "сильний дощ зі снігом",
-    "light snow and rain": "невеликий сніг з дощем",
-    "snow and rain": "сніг з дощем",
-    "heavy snow and rain": "сильний сніг з дощем",
-    "light showers of snow": "легкі снігові зливи",
-    "showers of snow": "снігові зливи",
-    "heavy showers of snow": "сильні снігові зливи",
-    "light showers of rain": "легкі дощові зливи",
-    "showers of rain": "дощові зливи",
-    "heavy showers of rain": "сильні дощові зливи",
-    "light showers of sleet": "легкі зливи мокрого снігу",
-    "showers of sleet": "зливи мокрого снігу",
-    "heavy showers of sleet": "сильні зливи мокрого снігу",
-    "light showers of ice pellets": "легкі зливи крижаної крупи",
-    "showers of ice pellets": "зливи крижаної крупи",
-    "heavy showers of ice pellets": "сильні зливи крижаної крупи",
-    "light hail showers": "легкі градові зливи",
-    "hail showers": "градові зливи",
-    "heavy hail showers": "сильні градові зливи",
-    "light thunderstorm with hail": "легка гроза з градом",
-    "thunderstorm with hail": "гроза з градом",
-    "heavy thunderstorm with hail": "сильна гроза з градом",
-    "partly cloudy with rain": "частково хмарно з дощем",
-    "cloudy with rain": "хмарно з дощем",
-    "overcast with rain": "похмуро з дощем",
-    "partly cloudy with snow": "частково хмарно зі снігом",
-    "cloudy with snow": "хмарно зі снігом",
-    "overcast with snow": "похмуро зі снігом",
-    "partly cloudy with thunderstorm": "частково хмарно з грозою",
-    "cloudy with thunderstorm": "хмарно з грозою",
-    "overcast with thunderstorm": "похмуро з грозою",
-}
+WEATHER_DESCRIPTIONS_UK = {"sunny": "ясно", "partly cloudy": "частково хмарно", "cloudy": "хмарно",
+                           "overcast": "похмуро", "light rain": "невеликий дощ", "moderate rain": "помірний дощ",
+                           "heavy rain": "сильний дощ", "thunderstorm": "гроза", "snow": "сніг",
+                           "light snow": "невеликий сніг", "moderate snow": "помірний сніг",
+                           "heavy snow": "сильний сніг", "sleet": "мокрий сніг", "fog": "туман", "mist": "мряка",
+                           "haze": "димка", "drizzle": "мряка", "freezing rain": "крижаний дощ",
+                           "ice pellets": "крижана крупа", "flurries": "снігові заряди", "showers": "зливи",
+                           "scattered showers": "розсіяні зливи", "broken clouds": "розбиті хмари",
+                           "few clouds": "мало хмар", "light drizzle": "легка мряка", "heavy drizzle": "сильна мряка",
+                           "rain and drizzle": "дощ та мряка", "light freezing rain": "легкий крижаний дощ",
+                           "heavy freezing rain": "сильний крижаний дощ", "light snow showers": "легкі снігові зливи",
+                           "heavy snow showers": "сильні снігові зливи", "light rain showers": "легкі дощові зливи",
+                           "heavy rain showers": "сильні дощові зливи", "light thunderstorm": "легка гроза",
+                           "heavy thunderstorm": "сильна гроза",
+                           "thunderstorm with light rain": "гроза з невеликим дощем",
+                           "thunderstorm with heavy rain": "гроза з сильним дощем",
+                           "thunderstorm with rain": "гроза з дощем",
+                           "thunderstorm with light drizzle": "гроза з легкою мрякою",
+                           "thunderstorm with heavy drizzle": "гроза з сильною мрякою",
+                           "thunderstorm with drizzle": "гроза з мрякою", "squalls": "шквали", "tornado": "торнадо",
+                           "dust": "пил", "sand": "пісок", "volcanic ash": "вулканічний попіл", "smoke": "дим",
+                           "hail": "град", "windy": "вітряно", "cold": "холодно", "hot": "спекотно",
+                           "calm": "безвітряно", "breezy": "легкий вітерець", "gale": "шторм", "storm": "шторм",
+                           "hurricane": "ураган", "tropical storm": "тропічний шторм", "blizzard": "хуртовина",
+                           "freezing fog": "крижаний туман", "widespread dust": "розповсюджений пил",
+                           "sandstorm": "піщана буря", "light rain and snow": "невеликий дощ зі снігом",
+                           "rain and snow": "дощ зі снігом", "heavy rain and snow": "сильний дощ зі снігом",
+                           "light snow and rain": "невеликий сніг з дощем", "snow and rain": "сніг з дощем",
+                           "heavy snow and rain": "сильний сніг з дощем",
+                           "light showers of snow": "легкі снігові зливи", "showers of snow": "снігові зливи",
+                           "heavy showers of snow": "сильні снігові зливи",
+                           "light showers of rain": "легкі дощові зливи", "showers of rain": "дощові зливи",
+                           "heavy showers of rain": "сильні дощові зливи",
+                           "light showers of sleet": "легкі зливи мокрого снігу",
+                           "showers of sleet": "зливи мокрого снігу",
+                           "heavy showers of sleet": "сильні зливи мокрого снігу",
+                           "light showers of ice pellets": "легкі зливи крижаної крупи",
+                           "showers of ice pellets": "зливи крижаної крупи",
+                           "heavy showers of ice pellets": "сильні зливи крижаної крупи",
+                           "light hail showers": "легкі градові зливи", "hail showers": "градові зливи",
+                           "heavy hail showers": "сильні градові зливи",
+                           "light thunderstorm with hail": "легка гроза з градом",
+                           "thunderstorm with hail": "гроза з градом",
+                           "heavy thunderstorm with hail": "сильна гроза з градом",
+                           "partly cloudy with rain": "частково хмарно з дощем", "cloudy with rain": "хмарно з дощем",
+                           "overcast with rain": "похмуро з дощем",
+                           "partly cloudy with snow": "частково хмарно зі снігом",
+                           "cloudy with snow": "хмарно зі снігом", "overcast with snow": "похмуро зі снігом",
+                           "partly cloudy with thunderstorm": "частково хмарно з грозою",
+                           "cloudy with thunderstorm": "хмарно з грозою",
+                           "overcast with thunderstorm": "похмуро з грозою", }
 
 # Keys translation
-KEYS_EN = {
-    "й": "q",
-    "ц": "w",
-    "у": "e",
-    "к": "r",
-    "е": "t",
-    "н": "y",
-    "г": "u",
-    "ш": "i",
-    "щ": "o",
-    "з": "p",
-    "х": "[",
-    "ї": "]",
-    "ф": "a",
-    "і": "s",
-    "в": "d",
-    "а": "f",
-    "п": "g",
-    "р": "h",
-    "о": "j",
-    "л": "k",
-    "д": "l",
-    "ж": ";",
-    "є": "'",
-    "я": "z",
-    "ч": "x",
-    "с": "c",
-    "м": "v",
-    "и": "b",
-    "т": "n",
-    "ь": "m",
-    "б": ",",
-    "ю": ".",
-    " ": " "
-}
+KEYS_EN = {"й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i", "щ": "o", "з": "p", "х": "[",
+           "ї": "]", "ф": "a", "і": "s", "в": "d", "а": "f", "п": "g", "р": "h", "о": "j", "л": "k", "д": "l", "ж": ";",
+           "є": "'", "я": "z", "ч": "x", "с": "c", "м": "v", "и": "b", "т": "n", "ь": "m", "б": ",", "ю": "."}
 
 
 # File Names
@@ -215,6 +119,7 @@ def get_resource_path(relative_path):
     except AttributeError:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+
 
 def get_user_data_path(filename):
     """ Get absolute path for user-specific writable data files """
@@ -227,8 +132,9 @@ def get_user_data_path(filename):
         # Linux/Unix: ~/.config/avrora
         app_data_dir = os.path.join(os.path.expanduser('~'), '.config', 'avrora')
 
-    os.makedirs(app_data_dir, exist_ok=True) # Ensure directory exists
+    os.makedirs(app_data_dir, exist_ok=True)  # Ensure directory exists
     return os.path.join(app_data_dir, filename)
+
 
 SETTINGS_FILENAME = get_user_data_path("settings.json")
 CUSTOM_COMMANDS_FILENAME = get_user_data_path("customCommands.json")
@@ -239,7 +145,6 @@ TODO_LIST_FILENAME = get_user_data_path("todoList.txt")
 
 # TTS output should go to a temporary directory
 TTS_OUTPUT = os.path.join(tempfile.gettempdir(), "avrora_output.mp3")
-
 
 # Web Addresses
 YOUTUBE_URL = "https://www.youtube.com"
@@ -321,7 +226,6 @@ SETTINGS_GROUP_PERSONALISATION_LABEL = "Персоналізація:"
 THEME_SWITCH_LABEL = "Темна тема"
 ACCENT_COLOR_LABEL = "Акцентний колір"
 
-
 CUSTOM_COMMANDS_HELP_LABEL = """
 ### Як додати власні команди:
 
@@ -349,7 +253,18 @@ CUSTOM_COMMANDS_HELP_LABEL = """
     *   **Результат:** Сказавши "постав таймер на 30 секунд", Аврора виконає `timer.exe 30`.
 """
 
-#UI Icons
+MULTIPLE_COMMAND_VARIANTS_HELP_LABEL = """
+### Варіації команд
+
+Якщо після назви команди стоїть * (зірочка), то команда має декілька варіацій.
+
+**Приклад:**
+    включи музику*
+    
+Побачити варіації крманд можливо якщо навестися на команду. 
+"""
+
+# UI Icons
 INFO_ICON = ft.Icons.INFO
 SETTINGS_ICON = ft.Icons.SETTINGS
 MIC_ICON = ft.Icons.MIC_NONE
@@ -381,17 +296,20 @@ CMD_DOUBLE_CLICK = "натисни 2 рази"
 CMD_SCROLL = "прокрути "
 CMD_REMIND = "нагадай про"
 CMD_SET_ALARM = "будильник на "
-CMD_GET_WEATHER_VARIANTS = ["яка погода", "погода"]
+CMD_GET_WEATHER_VARIANTS = ["яка погода", "погода", "прогноз погоди"]
 CMD_GET_LOCATION_VARIANTS = ["де я", "місто"]
 CMD_CALCULATE = "порахуй "
 CMD_SHUTDOWN_PC = "вимкни пк"
 CMD_RESTART_PC = "перезапусти пк"
-CMD_HIDE_WINDOW_VARIANTS = ["сховай вікно", "згорни вікно"]
-CMD_SHOW_WINDOW_VARIANTS = ["покажи вікно", "розгорнеш вікно", "розгорни вікно"]
-CMD_HIDE_ALL_WINDOWS_VARIANTS = ["сховай всі вікна", "покажи робочий стіл", "згорни всі вікна"]
-CMD_SHOW_ALL_WINDOWS_VARIANTS = ["покажи всі вікна", "розгорнеш всі вікна", "розгорни всі вікна"]
-CMD_CLOSE_PROGRAM = "закрий програму"
-CMD_SWITCH_WINDOW = "зміни вікно"
+CMD_HIDE_WINDOW_VARIANTS = ["сховай вікно", "згорни вікно", "сховай програму", "згорни програму"]
+CMD_SHOW_WINDOW_VARIANTS = ["покажи вікно", "розгорнеш вікно", "розгорни вікно", "покажи програму",
+                            "розгорнеш програму", "розгорни програму"]
+CMD_HIDE_ALL_WINDOWS_VARIANTS = ["сховай всі вікна", "покажи робочий стіл", "згорни всі вікна", "сховай всі програми",
+                                 "згорни всі програми"]
+CMD_SHOW_ALL_WINDOWS_VARIANTS = ["покажи всі вікна", "розгорнеш всі вікна", "розгорни всі вікна", "покажи всі програми",
+                                 "розгорнеш всі програми", "розгорни всі програми"]
+CMD_CLOSE_PROGRAM_VARIANTS = ["закрий програму", "закрий вікно"]
+CMD_SWITCH_WINDOW_VARIANTS = ["зміни вікно", "зміни програму"]
 CMD_SWITCH_TAB = "зміни вкладку"
 CMD_HIDE_SELF = "сховаєшся"
 CMD_GET_DATE = "дата"
@@ -402,7 +320,8 @@ CMD_REMOVE_TODO = "видали з списку справ "
 CMD_CLEAR_TODO_VARIANTS = ["очисти список справ", "очистити список справ"]
 CMD_NEXT_SONG_VARIANTS = ["наступна пісня", "наступний трек", "переключи трек", "переключи пісню"]
 CMD_PREVIOUS_SONG_VARIANTS = ["попередня пісня", "попередній трек"]
-CMD_PAUSE_SONG_VARIANTS = ["пауза", "пауза трека", "пауза пісні", "призупини трек", "призупини пісню", "призупини", "постав на паузу"]
+CMD_PAUSE_SONG_VARIANTS = ["пауза", "пауза трека", "пауза пісні", "призупини трек", "призупини пісню", "призупини",
+                           "постав на паузу"]
 CMD_RESUME_SONG_VARIANTS = ["віднови пісню", "віднови трек", "продовжити трек", "продовжи пісню", "зніми з паузи"]
 CMD_WRITE_TEXT = "напиши "
 
@@ -525,3 +444,18 @@ RESPONSE_WRITE_TEXT = "Написала, {}"
 RESPONSE_CUSTOM_COMMAND_EXECUTING = "Виконую, {}"
 RESPONSE_CUSTOM_COMMAND_ERROR = "Помилка з користувацькою командою, {}"
 RESPONSE_UNKNOWN_COMMAND = "Не розумію команду '{}', {}"
+
+# Variants of commands for command table
+TABLE_VARIANTS = {"включи музику*": "ввімкни музику\nувімкни музику",
+    "включи пісню [назва]*": "ввімкни пісню [назва]\nувімкни пісню [назва]", "які новини*": "покажи новини",
+    "яка погода*": "погода\nпрогноз погоди", "де я*": "місто",
+    "згорни вікно*": "сховай вікно\nсховай програму\nзгорни програму",
+    "розгорни вікно*": "покажи вікно\nрозгорнеш вікно\nпокажи програму\nрозгорни програму\nрозгорнеш програму",
+    "згорни всі вікна*": "сховай всі вікна\nпокажи робочий стіл\nсховай всі програми\nзгорни всі програми",
+    "розгорни всі вікна*": "покажи всі вікна\nрозгорнеш всі вікна\nпокажи всі програми\nрозгорнеш всі програми\nрозгорни всі програми",
+    "закрий програму*": "закрий вікно", "зміни вікно*": "зміни програму", "гучність на [0-100]*": "звук на [0-100]",
+    "список справ*": "що в мене в списку справ\nщо в списку справ", "очисти список справ*": "очистити список справ",
+    "пауза*": "пауза трека\nпауза пісні\nпризупини трек\nпризупини пісню\nпризупини\nпостав на паузу",
+    "віднови пісню*": "віднови трек\nпродовжити трек\nпродовжи пісню\nзніми з паузи",
+    "наступна пісня*": "наступний трек\nпереключи трек\nпереключи пісню",
+    "попередня пісня*": "попередня пісня\nпопередній трек"}

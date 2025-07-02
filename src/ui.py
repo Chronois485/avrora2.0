@@ -1,13 +1,15 @@
-import flet as ft
 import asyncio
-import constants as const
-import avroraCore
 import json
-import os
-import time
 import logging
+import os
 import re
-from typing import Optional
+import time
+
+import flet as ft
+
+import avroraCore
+import constants as const
+
 
 class UI:
     def __init__(self, page, on_first_launch_complete=None):
@@ -17,30 +19,23 @@ class UI:
         self.settings = {}
         self.settings_is_open = False
         self.info_is_open = False
-        self.statusIcon = ft.IconButton(icon=const.SPEAKING_ICON,
-                                        icon_size=20,
-                                        tooltip=const.STATUS_TOOLTIP,
-                                        animate_opacity=ft.Animation(300),
-                                        animate_rotation=ft.Animation(1000),
-                                        offset=ft.Offset(1.48, 0),
-                                        disabled=True,
-                                        rotate=ft.Rotate(angle=0, alignment=ft.alignment.center),
-                                        opacity=0)
+        self.statusIcon = ft.IconButton(icon=const.SPEAKING_ICON, icon_size=20, tooltip=const.STATUS_TOOLTIP,
+                                        animate_opacity=ft.Animation(300), animate_rotation=ft.Animation(1000),
+                                        offset=ft.Offset(1.48, 0), disabled=True,
+                                        rotate=ft.Rotate(angle=0, alignment=ft.alignment.center), opacity=0)
         self.chat_history_filename = const.CHAT_HISTORY_FILENAME
         self.load_chat_history()
 
-    def generate_message_id(self):
+    @staticmethod
+    def generate_message_id():
         return str(time.time_ns())
-    
 
-    def build_info_table(self):
+    @staticmethod
+    def build_info_table():
         logging.info("Building info table.")
-        table = ft.DataTable(
-            columns=[ft.DataColumn(ft.Text(const.INFO_TABLE_HEADER_COMMAND)),
-                     ft.DataColumn(ft.Text(const.INFO_TABLE_HEADER_ACTION))],
-            data_row_min_height=10,
-            data_row_max_height=45
-        )
+        table = ft.DataTable(columns=[ft.DataColumn(ft.Text(const.INFO_TABLE_HEADER_COMMAND)),
+                                      ft.DataColumn(ft.Text(const.INFO_TABLE_HEADER_ACTION))], data_row_min_height=10,
+                             data_row_max_height=45)
 
         user_data_dir = os.path.dirname(const.INFO_TABLE_FILENAME)
         os.makedirs(user_data_dir, exist_ok=True)
@@ -55,12 +50,12 @@ class UI:
         except (FileNotFoundError, json.JSONDecodeError) as e:
             logging.error(f"Could not load or parse default commands table: {e}", exc_info=True)
 
-        user_data = {}
         try:
             with open(const.INFO_TABLE_FILENAME, "r", encoding="utf-8") as f:
                 user_data = json.load(f)
             if not isinstance(user_data, dict):
-                logging.warning(f"User commands table {const.INFO_TABLE_FILENAME} has invalid format. It will be overwritten.")
+                logging.warning(
+                    f"User commands table {const.INFO_TABLE_FILENAME} has invalid format. It will be overwritten.")
                 user_data = {}
         except (FileNotFoundError, json.JSONDecodeError):
             logging.info(f"User commands table not found or corrupted. Will be created/overwritten from default.")
@@ -74,13 +69,27 @@ class UI:
                     json.dump(user_data, f, ensure_ascii=False, indent=4)
                 logging.info("User commands table updated successfully.")
             except IOError as e:
-                logging.error(f"Could not write updated commands table to {const.INFO_TABLE_FILENAME}: {e}", exc_info=True)
-        
+                logging.error(f"Could not write updated commands table to {const.INFO_TABLE_FILENAME}: {e}",
+                              exc_info=True)
+
         table_data = user_data
         if not isinstance(table_data, dict): table_data = {}
-        
+
         for key, value in table_data.items():
-            table.rows.append(ft.DataRow(cells=[ft.DataCell(ft.Text(key, size=10)), ft.DataCell(ft.Text(value, size=10))]))
+            if key[-1] == "*":
+                command_tooltip = const.TABLE_VARIANTS.get(key)
+                if command_tooltip:
+                    table.rows.append(ft.DataRow(cells=[ft.DataCell(ft.Text(key, size=10, tooltip=command_tooltip)),
+                                                        ft.DataCell(ft.Text(value, size=10))]))
+                else:
+                    logging.info(f"Adding command {key}, with tooltip {command_tooltip} to info table.")
+                    table.rows.append(
+                        ft.DataRow(cells=[ft.DataCell(ft.Text(key, size=10)), ft.DataCell(ft.Text(value, size=10))]))
+                    logging.warning("Error while building info table. No tooltip for command")
+            else:
+                table.rows.append(
+                    ft.DataRow(cells=[ft.DataCell(ft.Text(key, size=10)), ft.DataCell(ft.Text(value, size=10))]))
+                logging.info(f"Adding command {key} to info table.")
         logging.info(f"Info table built with {len(table.rows)} rows.")
         return table
 
@@ -96,24 +105,12 @@ class UI:
         self.firstLaunchL = ft.Text(value=const.FIRST_LAUNCH_LABEL, size=20, text_align="center", width=350)
         self.firstLaunchI = ft.TextField(label=const.FIRST_LAUNCH_INPUT_LABEL, value="", width=300)
 
-        confirm_button = ft.ElevatedButton(
-            text=const.FIRST_LAUNCH_CONFIRM_BUTTON,
-            on_click=self._handle_first_launch_submit,
-            width=200,
-            height=40,
-        )
+        confirm_button = ft.ElevatedButton(text=const.FIRST_LAUNCH_CONFIRM_BUTTON,
+                                           on_click=self._handle_first_launch_submit, width=200, height=40, )
 
         first_launch_layout = ft.Column(
-            [
-                self.firstLaunchL,
-                ft.Container(height=10),
-                self.firstLaunchI,
-                ft.Container(height=20),
-                confirm_button,
-            ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=10,
-        )
+            [self.firstLaunchL, ft.Container(height=10), self.firstLaunchI, ft.Container(height=20), confirm_button, ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10, )
 
         self.page.add(first_launch_layout)
         self.page.update()
@@ -128,16 +125,9 @@ class UI:
             return
 
         logging.info(f"First launch submitted. User name set to: '{user_name}'")
-        await avroraCore.save_settings({
-            "name": user_name,
-            "tgo": False,
-            "tgpath": const.DEFAULT_TG_PATH,
-            "music": const.DEFAULT_MUSIC_LINK,
-            "pcpower": False,
-            "city": const.DEFAULT_CITY,
-            "num_headlines": 5,
-            "theme": "dark"
-        })
+        await avroraCore.save_settings(
+            {"name": user_name, "tgo": False, "tgpath": const.DEFAULT_TG_PATH, "music": const.DEFAULT_MUSIC_LINK,
+             "pcpower": False, "city": const.DEFAULT_CITY, "num_headlines": 5, "theme": "dark"})
 
         self.page.clean()
         self.page.update()
@@ -148,10 +138,7 @@ class UI:
     async def build_ui(self):
         logging.info("Building main UI components.")
         self.settings = await avroraCore.load_settings()
-        self.page.fonts = {
-            "Tektur": const.TEKTUR_FONT_PATH,
-            "TekturBold": const.TEKTUR_BOLD_FONT_PATH
-        }
+        self.page.fonts = {"Tektur": const.TEKTUR_FONT_PATH, "TekturBold": const.TEKTUR_BOLD_FONT_PATH}
         self.page.title = const.APP_NAME
         self.page.window.width = const.WINDOW_WIDTH
         self.page.window.height = const.WINDOW_HEIGHT
@@ -161,123 +148,80 @@ class UI:
         self.page.window.min_height = const.WINDOW_MIN_HEIGHT
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        
+
         accent_color = self.settings.get("accent_color", const.DEEP_PURPLE_400)
         self.page.theme = ft.Theme(color_scheme_seed=accent_color, font_family=const.FONT_FAMILY)
         self.page.dark_theme = ft.Theme(color_scheme_seed=accent_color, font_family=const.FONT_FAMILY)
-        
+
         # Set initial theme based on settings
         self.page.theme_mode = ft.ThemeMode.DARK if self.settings.get("theme") == "dark" else ft.ThemeMode.LIGHT
 
-        self.settingsMenu = ft.Container(
-            width=420,
-            height=510,
-            border_radius=10,
-            offset=ft.Offset(0, -0.23),
-            bgcolor=const.INITIONAL_COLOR,
-            border=ft.border.all(2, ft.Colors.PRIMARY),
-            animate_offset=ft.Animation(250),
-            padding=10)
+        self.settingsMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(0, -0.23),
+                                         bgcolor=const.INITIONAL_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
+                                         animate_offset=ft.Animation(250), padding=10)
 
         self.infoHeader = ft.Text(const.INFO_HEADER_LABEL, size=10)
 
         self.infoTable = self.build_info_table()
 
-        
+        self.multipleCommandsHelp = ft.Markdown(const.MULTIPLE_COMMAND_VARIANTS_HELP_LABEL, selectable=True,
+                                                extension_set=const.MARKDOWN_EXTENSION_SET,
+                                                code_theme=const.MARKDOWN_CODE_THEME, )
 
-        self.customCommandsHelp = ft.Markdown(
-            const.CUSTOM_COMMANDS_HELP_LABEL,
-            selectable=True,
-            extension_set=const.MARKDOWN_EXTENSION_SET,
-            code_theme=const.MARKDOWN_CODE_THEME,
-        )
+        self.customCommandsHelp = ft.Markdown(const.CUSTOM_COMMANDS_HELP_LABEL, selectable=True,
+                                              extension_set=const.MARKDOWN_EXTENSION_SET,
+                                              code_theme=const.MARKDOWN_CODE_THEME, )
         self.customCommandsHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
 
         self.infoMenuDivider = ft.Divider(height=1, thickness=2)
 
-        self.infoMenu = ft.Container(
-            width=420,
-            height=510,
-            border_radius=10,
-            offset=ft.Offset(-2.08, -0.23),
-            bgcolor=const.INITIONAL_COLOR,
-            border=ft.border.all(2, ft.Colors.PRIMARY),
-            animate_offset=ft.Animation(250),
-            padding=10)
-        self.nameTlow = ft.Text(value=const.APP_FULL_NAME,
-                           text_align="center",
-                           width=160)
+        self.infoMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(-2.08, -0.23),
+                                     bgcolor=const.INITIONAL_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
+                                     animate_offset=ft.Animation(250), padding=10)
+        self.nameTlow = ft.Text(value=const.APP_FULL_NAME, text_align="center", width=160)
         self.nameT = ft.Text(value=const.APP_NAME, text_align="center", width=160, size=29)
         self.nameCol = ft.Column(spacing=10, controls=[self.nameT, self.nameTlow, self.statusIcon])
         self.infoMenu.content = ft.Column(
-            controls=[
-                self.infoHeader,
-                self.infoTable,
-                self.infoMenuDivider,
-                self.customCommandsHelp
-            ],
-            scroll=const.SCROLL_MODE_AUTO
-        )
+            controls=[self.infoHeader, self.infoTable, self.infoMenuDivider, self.multipleCommandsHelp,
+                      self.infoMenuDivider, self.customCommandsHelp], scroll=const.SCROLL_MODE_AUTO)
         self.msgs = list()
         self.msgsCol = ft.Column(controls=self.msgs, scroll=const.SCROLL_MODE_AUTO)
         self.msgsBox = ft.Container(content=self.msgsCol, width=420, height=420)
         self.chatCol = ft.Column(controls=[self.msgsBox], scroll=const.SCROLL_MODE_AUTO)
-        self.chat = ft.Container(width=420,
-                            height=420, content=self.chatCol,
-                            offset=ft.Offset(-0.005, -0.09))
+        self.chat = ft.Container(width=420, height=420, content=self.chatCol, offset=ft.Offset(-0.005, -0.09))
 
         self.TGPath = ft.Text(value=f"{const.TG_PATH_LABEL_PREFIX}{self.settings.get('tgpath')}", width=350)
 
-        self.YourNameI = ft.TextField(label=const.YOUR_NAME_LABEL,
-                                 value=self.settings.get("name") or "",
-                                 on_change=self.update_settings,
-                                 expand=False,
-                                 disabled=False,
-                                 visible=True)
-        
-        self.NewsHeadersCountT = ft.Text(value=const.NEWS_HEADERS_COUNT_LABEL, size=15)
-        
-        self.NewsHeadersCountS = ft.Slider(min=1, max=10, 
-                                          value=self.settings.get("num_headlines", 5),
-                                          divisions=9,
-                                          label="{value}",
-                                          on_change=self.update_settings)
+        self.YourNameI = ft.TextField(label=const.YOUR_NAME_LABEL, value=self.settings.get("name") or "",
+                                      on_change=self.update_settings, expand=False, disabled=False, visible=True)
 
-        self.themeS = ft.Switch(label=const.THEME_SWITCH_LABEL,
-                                value=(self.settings.get("theme") == "dark"),
+        self.NewsHeadersCountT = ft.Text(value=const.NEWS_HEADERS_COUNT_LABEL, size=15)
+
+        self.NewsHeadersCountS = ft.Slider(min=1, max=10, value=self.settings.get("num_headlines", 5), divisions=9,
+                                           label="{value}", on_change=self.update_settings)
+
+        self.themeS = ft.Switch(label=const.THEME_SWITCH_LABEL, value=(self.settings.get("theme") == "dark"),
                                 on_change=self.switch_theme)
 
-        self.accent_color_dropdown = ft.Dropdown(
-            label=const.ACCENT_COLOR_LABEL,
-            options=[ft.dropdown.Option(color_name) for color_name in const.ACCENT_COLORS.keys()],
-            value=self.settings.get("accent_color_name", "Deep Purple"),
-            on_change=self.switch_accent_color
-        )
+        self.accent_color_dropdown = ft.Dropdown(label=const.ACCENT_COLOR_LABEL,
+                                                 options=[ft.dropdown.Option(color_name) for color_name in
+                                                          const.ACCENT_COLORS.keys()],
+                                                 value=self.settings.get("accent_color_name", "Deep Purple"),
+                                                 on_change=self.switch_accent_color)
 
-        self.CityI = ft.TextField(label=const.CITY_LABEL,
-                                 value=self.settings.get("city") or "",
-                                 on_change=self.update_settings,
-                                 expand=False,
-                                 disabled=False,
-                                 visible=True)
+        self.CityI = ft.TextField(label=const.CITY_LABEL, value=self.settings.get("city") or "",
+                                  on_change=self.update_settings, expand=False, disabled=False, visible=True)
 
-        self.musicLinkI = ft.TextField(label=const.MUSIC_LINK_LABEL,
-                                  value=self.settings.get("music") or "",
-                                  on_change=self.update_settings)
+        self.musicLinkI = ft.TextField(label=const.MUSIC_LINK_LABEL, value=self.settings.get("music") or "",
+                                       on_change=self.update_settings)
 
         self.useTGOnlineCB = ft.Checkbox(label=const.USE_TG_ONLINE_LABEL, value=self.settings.get("tgo"),
-                                    label_position=ft.LabelPosition.LEFT,
-                                    on_change=self.update_settings)
-        self.clearChatButton = ft.ElevatedButton(text=const.CLEAR_CHAT_BUTTON_LABEL,
-                                                width=200,
-                                                height=30,
-                                                on_click=self.clearChat)
-        self.resetSettingsButton = ft.ElevatedButton(text=const.RESET_SETTINGS_BUTTON_LABEL,
-                                                width=200,
-                                                height=30,
-                                                on_click=self.resetSettings)
-        
-                                                 
+                                         label_position=ft.LabelPosition.LEFT, on_change=self.update_settings)
+        self.clearChatButton = ft.ElevatedButton(text=const.CLEAR_CHAT_BUTTON_LABEL, width=200, height=30,
+                                                 on_click=self.clearChat)
+        self.resetSettingsButton = ft.ElevatedButton(text=const.RESET_SETTINGS_BUTTON_LABEL, width=200, height=30,
+                                                     on_click=self.resetSettings)
+
         self.permisionsToControlPCPowerCB = ft.Checkbox(label=const.PERMISSIONS_TO_CONTROL_PC_POWER_LABEL,
                                                         value=self.settings.get("pcpower"),
                                                         label_position=ft.LabelPosition.LEFT,
@@ -285,100 +229,72 @@ class UI:
 
         self.file_picker = ft.FilePicker(on_result=self.on_file_selected)
         self.page.overlay.append(self.file_picker)
-        self.selectTGFile = ft.ElevatedButton(
-            const.SELECT_TG_FILE_LABEL,
-            on_click=lambda _: self.file_picker.pick_files(
-                allow_multiple=False,
-                allowed_extensions=const.ALLOWED_EXTENSIONS_EXE
-            ))
+        self.selectTGFile = ft.ElevatedButton(const.SELECT_TG_FILE_LABEL,
+                                              on_click=lambda _: self.file_picker.pick_files(allow_multiple=False,
+                                                                                             allowed_extensions=const.ALLOWED_EXTENSIONS_EXE))
 
-        self.passiveL = ft.TextField(value=const.SETTINGS_LABEL, text_align="center",
-                                border_width=0, border_radius=10)
+        self.passiveL = ft.TextField(value=const.SETTINGS_LABEL, text_align="center", border_width=0, border_radius=10)
 
-        self.infoB = ft.IconButton(icon=const.INFO_ICON,
-                                  icon_size=20,
-                                  tooltip="Команди",
-                                  on_click=self.openInfo,
-                                  offset=ft.Offset(0, -1))
+        self.infoB = ft.IconButton(icon=const.INFO_ICON, icon_size=20, tooltip="Команди", on_click=self.openInfo,
+                                   offset=ft.Offset(0, -1))
 
-        self.settingsB = ft.IconButton(icon=const.SETTINGS_ICON,
-                                      icon_size=20,
-                                      tooltip="Налаштування", # type: ignore
-                                      on_click=self.openSetings,
-                                      offset=ft.Offset(0, -1))
+        self.settingsB = ft.IconButton(icon=const.SETTINGS_ICON, icon_size=20, tooltip="Налаштування",  # type: ignore
+                                       on_click=self.openSetings, offset=ft.Offset(0, -1))
 
-        self.CCmLabel = ft.TextField(value=const.CUSTOM_COMMANDS_LABEL, text_align="center",
-                                border_width=0, border_radius=10,
-                                disabled=True)
+        self.CCmLabel = ft.TextField(value=const.CUSTOM_COMMANDS_LABEL, text_align="center", border_width=0,
+                                     border_radius=10, disabled=True)
 
         self.CCmDropdownOptions = [ft.dropdown.Option("", text=const.NEW_COMMAND_LABEL)]
 
-        self.CCmDropdown = ft.Dropdown(label=const.DROPDOWN_CHOOSE_COMMAND_LABEL, options=self.CCmDropdownOptions, on_change=self.on_CC_choosed)
+        self.CCmDropdown = ft.Dropdown(label=const.DROPDOWN_CHOOSE_COMMAND_LABEL, options=self.CCmDropdownOptions,
+                                       on_change=self.on_CC_choosed)
 
-        self.CCmNameI = ft.TextField(label=const.COMMAND_NAME_LABEL,
-                                value="",
-                                expand=False,
-                                disabled=False,
-                                visible=True, )
+        self.CCmNameI = ft.TextField(label=const.COMMAND_NAME_LABEL, value="", expand=False, disabled=False,
+                                     visible=True, )
 
-        self.CCmActionI = ft.TextField(label=const.COMMAND_ACTION_LABEL,
-                                  value="",
-                                  expand=False,
-                                  disabled=False,
-                                  visible=True)
+        self.CCmActionI = ft.TextField(label=const.COMMAND_ACTION_LABEL, value="", expand=False, disabled=False,
+                                       visible=True)
 
-        self.CCmDeleteB = ft.ElevatedButton(text=const.DELETE_CC_LABEL,
-                                           width=150,
-                                           height=30,
-                                           on_click=self.delete_CC)
-        
-        self.CCmSumbitB = ft.ElevatedButton(text=const.CONFIRM_CC_LABEL,
-                                           width=180,
-                                           height=30,
-                                           on_click=self.accept_CCm)
+        self.CCmDeleteB = ft.ElevatedButton(text=const.DELETE_CC_LABEL, width=150, height=30, on_click=self.delete_CC)
 
-        self.CCmCanceltB = ft.ElevatedButton(text=const.CANCEL_CC_LABEL,
-                                            width=180,
-                                            height=30,
-                                            on_click=self.close_CCm)
+        self.CCmSumbitB = ft.ElevatedButton(text=const.CONFIRM_CC_LABEL, width=180, height=30, on_click=self.accept_CCm)
+
+        self.CCmCanceltB = ft.ElevatedButton(text=const.CANCEL_CC_LABEL, width=180, height=30, on_click=self.close_CCm)
 
         self.CCmButtonsRow = ft.Row(spacing=20, controls=[self.CCmSumbitB, self.CCmCanceltB], alignment="center")
 
-        self.CCmCol = ft.Column(spacing=10, controls=[self.CCmLabel, self.CCmDropdown, self.CCmNameI, self.CCmActionI, self.CCmDeleteB, self.CCmButtonsRow])
+        self.CCmCol = ft.Column(spacing=10, controls=[self.CCmLabel, self.CCmDropdown, self.CCmNameI, self.CCmActionI,
+                                                      self.CCmDeleteB, self.CCmButtonsRow])
 
-        self.CCm = ft.Container(width=425,
-                           height=510,
-                           border_radius=10,
-                           padding=10,
-                           alignment=ft.alignment.center,
-                           content=self.CCmCol,
-                           animate_offset=ft.Animation(250),
-                           bgcolor=const.INITIONAL_COLOR,
-                           border=ft.border.all(2, ft.Colors.PRIMARY),
-                           offset=ft.Offset(-1.03, -1.25))
+        self.CCm = ft.Container(width=425, height=510, border_radius=10, padding=10, alignment=ft.alignment.center,
+                                content=self.CCmCol, animate_offset=ft.Animation(250), bgcolor=const.INITIONAL_COLOR,
+                                border=ft.border.all(2, ft.Colors.PRIMARY), offset=ft.Offset(-1.03, -1.25))
 
-        self.CCmOpen = ft.ElevatedButton(text=const.CUSTOM_COMMANDS_BUTTON_LABEL,
-                                    width=200,
-                                    height=30,
-                                    on_click=self.open_CCm)
-        
-        self.settignsDivider = ft.Divider(height=1, thickness=2) 
+        self.CCmOpen = ft.ElevatedButton(text=const.CUSTOM_COMMANDS_BUTTON_LABEL, width=200, height=30,
+                                         on_click=self.open_CCm)
+
+        self.settignsDivider = ft.Divider(height=1, thickness=2)
         self.settingsGroupTG = ft.Text(value=const.SETTINGS_GROUP_TG_LABEL, size=20, text_align="center")
-        self.settingsGroupPersonalInfo = ft.Text(value=const.SETTINGS_GROUP_PERSONAL_INFO_LABEL, size=20, text_align="center")
-        self.settingsGroupPermissions = ft.Text(value=const.SETTINGS_GROUP_PERMISSIONS_LABEL, size=20, text_align="center")
+        self.settingsGroupPersonalInfo = ft.Text(value=const.SETTINGS_GROUP_PERSONAL_INFO_LABEL, size=20,
+                                                 text_align="center")
+        self.settingsGroupPermissions = ft.Text(value=const.SETTINGS_GROUP_PERMISSIONS_LABEL, size=20,
+                                                text_align="center")
         self.settingsGroupChat = ft.Text(value=const.SETTINGS_GROUP_CHAT_LABEL, size=20, text_align="center")
         self.settingsGroupCC = ft.Text(value=const.SETTINGS_GROUP_CC_LABEL, size=20, text_align="center")
-        self.settingsGroupPersonalisation = ft.Text(value=const.SETTINGS_GROUP_PERSONALISATION_LABEL, size=20, text_align="center")
+        self.settingsGroupPersonalisation = ft.Text(value=const.SETTINGS_GROUP_PERSONALISATION_LABEL, size=20,
+                                                    text_align="center")
 
         self.settingsCol = ft.Column(spacing=10,
-                                controls=[self.passiveL, self.settingsGroupPersonalInfo, self.YourNameI, self.CityI, self.musicLinkI, 
-                                           self.NewsHeadersCountT, self.NewsHeadersCountS, self.settignsDivider, self.settingsGroupPersonalisation, 
-                                           self.themeS, self.accent_color_dropdown, self.settignsDivider,
-                                           self.settingsGroupTG ,self.TGPath, self.selectTGFile, self.useTGOnlineCB,self.settignsDivider, 
-                                           self.settingsGroupPermissions, self.permisionsToControlPCPowerCB, self.resetSettingsButton, self.settignsDivider, 
-                                           self.settingsGroupChat, self.clearChatButton, self.settignsDivider,
-                                           self.settingsGroupCC, self.CCmOpen, self.settignsDivider],
-                                scroll="auto")
+                                     controls=[self.passiveL, self.settingsGroupPersonalInfo, self.YourNameI,
+                                               self.CityI, self.musicLinkI, self.NewsHeadersCountT,
+                                               self.NewsHeadersCountS, self.settignsDivider,
+                                               self.settingsGroupPersonalisation, self.themeS,
+                                               self.accent_color_dropdown, self.settignsDivider, self.settingsGroupTG,
+                                               self.TGPath, self.selectTGFile, self.useTGOnlineCB, self.settignsDivider,
+                                               self.settingsGroupPermissions, self.permisionsToControlPCPowerCB,
+                                               self.resetSettingsButton, self.settignsDivider, self.settingsGroupChat,
+                                               self.clearChatButton, self.settignsDivider, self.settingsGroupCC,
+                                               self.CCmOpen, self.settignsDivider], scroll="auto")
         self.settingsMenu.content = self.settingsCol
 
         async def _apply_theme_on_mount(e):
@@ -387,7 +303,7 @@ class UI:
             This ensures that components have the correct colors on the first launch.
             """
             await self.apply_and_update_theme()
-            self.page.on_mount = None # Run only once
+            self.page.on_mount = None  # Run only once
 
         self.page.on_mount = _apply_theme_on_mount
 
@@ -409,7 +325,7 @@ class UI:
         if not active_theme or not active_theme.color_scheme:
             logging.warning("Color scheme not available yet. Deferring color application.")
             return
-        
+
         color_scheme = active_theme.color_scheme
         if not color_scheme:
             logging.error("Aborting color update because color scheme could not be determined.")
@@ -498,7 +414,7 @@ class UI:
             os.remove(const.SETTINGS_FILENAME)
         self.YourNameI.value = ""
         self.useTGOnlineCB.value = False
-        self.TGPath.value = "" # type: ignore
+        self.TGPath.value = ""  # type: ignore
         self.musicLinkI.value = ""
         self.permisionsToControlPCPowerCB.value = False
         self.CityI.value = ""
@@ -516,7 +432,7 @@ class UI:
         self.settings['theme'] = new_theme_str
         await avroraCore.save_settings(self.settings)
         await self.apply_and_update_theme()
-        
+
     async def switch_accent_color(self, e):
         """Handles the accent color switch, updates the theme, and saves the setting."""
         color_name = self.accent_color_dropdown.value
@@ -614,17 +530,17 @@ class UI:
             self.statusIcon.opacity = 0
             await asyncio.sleep(0.1)
             self.statusIcon.animate_rotation = None
-            self.statusIcon.rotate = ft.Rotate(angle=0, alignment=ft.alignment.center) 
+            self.statusIcon.rotate = ft.Rotate(angle=0, alignment=ft.alignment.center)
             self.statusIcon.opacity = 1
         elif status == const.STATUS_SPEAKING:
             self.statusIcon.icon = const.SPEAKING_ICON
             self.statusIcon.opacity = 0
             await asyncio.sleep(0.1)
             self.statusIcon.animate_rotation = None
-            self.statusIcon.rotate = ft.Rotate(angle=0, alignment=ft.alignment.center) 
+            self.statusIcon.rotate = ft.Rotate(angle=0, alignment=ft.alignment.center)
             self.statusIcon.opacity = 1
         else:
-            self.statusIcon.rotate = ft.Rotate(angle=0, alignment=ft.alignment.center) 
+            self.statusIcon.rotate = ft.Rotate(angle=0, alignment=ft.alignment.center)
             self.statusIcon.opacity = 0
         self.statusIcon.update()
         await asyncio.sleep(0.1)
@@ -644,15 +560,9 @@ class UI:
 
             # Кольори з теми
             bubble_color = (
-                color_scheme.primary_container if user == const.USER_ROLE else
-                color_scheme.secondary_container if user == const.PROGRAM_ROLE else
-                color_scheme.tertiary_container
-            )
+                color_scheme.primary_container if user == const.USER_ROLE else color_scheme.secondary_container if user == const.PROGRAM_ROLE else color_scheme.tertiary_container)
             text_color = (
-                color_scheme.on_primary_container if user == const.USER_ROLE else
-                color_scheme.on_secondary_container if user == const.PROGRAM_ROLE else
-                color_scheme.on_tertiary_container
-            )
+                color_scheme.on_primary_container if user == const.USER_ROLE else color_scheme.on_secondary_container if user == const.PROGRAM_ROLE else color_scheme.on_tertiary_container)
         except Exception as e:
             logging.warning(f"Using fallback colors: {e}")
             if user == const.USER_ROLE:
@@ -676,14 +586,8 @@ class UI:
                 if start > last_end:
                     spans.append(ft.TextSpan(text[last_end:start], ft.TextStyle(color=text_color)))
                 spans.append(
-                    ft.TextSpan(
-                        url,
-                        ft.TextStyle(
-                            color=ft.Colors.BLUE_400,
-                            decoration=ft.TextDecoration.UNDERLINE
-                        ),
-                        url=url
-                    ))
+                    ft.TextSpan(url, ft.TextStyle(color=ft.Colors.BLUE_400, decoration=ft.TextDecoration.UNDERLINE),
+                                url=url))
                 last_end = end
             if last_end < len(text):
                 spans.append(ft.TextSpan(text[last_end:], ft.TextStyle(color=text_color)))
@@ -692,22 +596,11 @@ class UI:
             text_widget = ft.Text(value=text, width=380, selectable=True, color=text_color)
 
         alignment = (
-            ft.MainAxisAlignment.END if user == const.USER_ROLE else
-            ft.MainAxisAlignment.START if user == const.PROGRAM_ROLE else
-            ft.MainAxisAlignment.CENTER
-        )
+            ft.MainAxisAlignment.END if user == const.USER_ROLE else ft.MainAxisAlignment.START if user == const.PROGRAM_ROLE else ft.MainAxisAlignment.CENTER)
 
         # Створення повідомлення
-        new_message = ft.Row(
-            alignment=alignment,
-            controls=[
-                ft.Container(
-                    content=text_widget,
-                    bgcolor=bubble_color,
-                    border_radius=10,
-                    padding=10,
-                    margin=5
-                )])
+        new_message = ft.Row(alignment=alignment, controls=[
+            ft.Container(content=text_widget, bgcolor=bubble_color, border_radius=10, padding=10, margin=5)])
 
         if message_id:
             new_message.data = message_id
@@ -728,7 +621,7 @@ class UI:
     def on_startup(self):
         self.load_chat_history()
         self.update_chat_from_history()
-    
+
     def clearChat(self, e):
         logging.info("Clearing chat history.")
         self.msgsCol.controls.clear()
@@ -757,9 +650,11 @@ class UI:
                     if isinstance(self.chat_history, list) and all(isinstance(item, str) for item in self.chat_history):
                         new_chat_history = []
                         for message in self.chat_history:
-                            new_chat_history.append({"text": message, "user": const.PROGRAM_ROLE, "id": self.generate_message_id()})
+                            new_chat_history.append(
+                                {"text": message, "user": const.PROGRAM_ROLE, "id": self.generate_message_id()})
                         self.chat_history = new_chat_history
-                    elif isinstance(self.chat_history, list) and all(isinstance(item, dict) for item in self.chat_history):
+                    elif isinstance(self.chat_history, list) and all(
+                            isinstance(item, dict) for item in self.chat_history):
                         for message in self.chat_history:
                             if "id" not in message:
                                 message["id"] = self.generate_message_id()

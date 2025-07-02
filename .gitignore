@@ -2,4 +2,4 @@ dist/
 build/
 .venv/
 .idea
-avrora.log
+./avrora.log

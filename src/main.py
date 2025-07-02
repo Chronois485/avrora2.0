@@ -1,14 +1,17 @@
-import flet as ft
 import asyncio
+import logging
+import os
+import sys
+
+import flet as ft
+
 import avroraCore
 import constants as const
-import logging
-import sys
-import os
 from ui import UI
 
 logging.basicConfig(filename=const.LOG_FILENAME, level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(message)s')
+
 
 async def listen(page, ui_instance):
     logging.info("Starting main listening loop.")
@@ -16,11 +19,13 @@ async def listen(page, ui_instance):
     while True:
         text = await avroraCore.listen(on_status_change=ui_instance.animateStatus)
         if text:
-            logging.info(f"Recognized text: '{text}'") 
+            logging.info(f"Recognized text: '{text}'")
             if text.startswith(const.WAKE_WORD):
                 await ui_instance.addToChat(text, const.USER_ROLE)
                 try:
-                    ans, result_message = await avroraCore.doSomething(text, page, on_status_change=ui_instance.animateStatus, on_remind=ui_instance.addToChat)
+                    ans, result_message = await avroraCore.doSomething(text, page,
+                                                                       on_status_change=ui_instance.animateStatus,
+                                                                       on_remind=ui_instance.addToChat)
                     if result_message:
                         await ui_instance.addToChat(result_message, const.PROGRAM_ROLE)
                     if ans == const.EXIT_COMMAND:
@@ -38,7 +43,7 @@ async def listen(page, ui_instance):
         await asyncio.sleep(0)
 
     page.window.destroy()
-    await asyncio.sleep(0.5)  
+    await asyncio.sleep(0.5)
 
     if action_after_loop == const.RESTART_COMMAND:
         logging.info("Executing restart.")
@@ -46,12 +51,15 @@ async def listen(page, ui_instance):
     else:
         logging.info("Exiting application.")
 
+
 async def start_app_flow(page, ui_instance):
     """Основний потік програми після початкового налаштування/діалогу."""
     logging.info("Sending initial greeting.")
-    _, result_message = await avroraCore.doSomething(f"{const.WAKE_WORD} {const.CMD_GREETING_VARIANTS[0]}", page, on_status_change=ui_instance.animateStatus)
+    _, result_message = await avroraCore.doSomething(f"{const.WAKE_WORD} {const.CMD_GREETING_VARIANTS[0]}", page,
+                                                     on_status_change=ui_instance.animateStatus)
     await ui_instance.addToChat(result_message, const.PROGRAM_ROLE)
     await listen(page, ui_instance)
+
 
 async def build_and_run_main_app(page, ui_instance):
     """Будує основний UI та запускає головний потік програми."""
@@ -60,6 +68,7 @@ async def build_and_run_main_app(page, ui_instance):
     await ui_instance.apply_and_update_theme()
 
     await start_app_flow(page, ui_instance)
+
 
 async def main(page: ft.Page):
     logging.info("Application starting.")
@@ -79,5 +88,6 @@ async def main(page: ft.Page):
     else:
         logging.info("Existing user, building main application UI.")
         await _start_app()
+
 
 ft.app(target=main, name=const.APP_NAME)
