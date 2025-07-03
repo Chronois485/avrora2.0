@@ -190,24 +190,11 @@ async def get_weather_info():
             if not location.city:
                 return const.RESPONSE_WEATHER_FAILED_NO_CITY
             city = location.city
-        async with python_weather.Client(unit=python_weather.METRIC) as client:
+        async with python_weather.Client(unit=python_weather.METRIC, locale=python_weather.Locale.UKRAINIAN) as client:
             logging.info(f"Fetching weather for city: {city}")
             weather = await client.get(city)
 
-            def _translate_weather_description(description_en):
-                cleaned_description = description_en.strip().lower()
-                logging.debug(
-                    f"Translating weather description: original='{description_en}', cleaned='{cleaned_description}'")
-                return const.WEATHER_DESCRIPTIONS_UK.get(cleaned_description, description_en)
-
-            try:
-                current_weather = weather.current
-                translated_description = _translate_weather_description(current_weather.description)
-                response = const.RESPONSE_WEATHER_CURRENT.format(city, current_weather.temperature,
-                                                                 current_weather.feels_like, translated_description, )
-            except AttributeError:
-                translated_description = _translate_weather_description(weather.description)
-                response = const.RESPONSE_WEATHER_FORECAST.format(city, weather.temperature, translated_description, )
+            response = const.RESPONSE_WEATHER_FORECAST.format(city, weather.temperature, weather.description)
             logging.info(f"Successfully fetched weather: {response}")
             return response
     except Exception as e:

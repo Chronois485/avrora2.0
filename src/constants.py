@@ -31,6 +31,20 @@ CHAT_FALLBACK_COLORS = {"user_bubble": ft.Colors.PRIMARY_CONTAINER, "user_text":
 # Logging
 LOG_FILENAME = "avrora.log"
 
+# UI Icons
+INFO_ICON = ft.Icons.INFO
+SETTINGS_ICON = ft.Icons.SETTINGS
+MIC_ICON = ft.Icons.MIC_NONE
+LOADING_ICON = ft.Icons.AUTORENEW_ROUNDED
+SPEAKING_ICON = ft.Icons.VOLUME_UP_OUTLINED
+SUNNY_ICON = ft.Icons.SUNNY
+CLOUDY_ICON = ft.Icons.WB_CLOUDY
+WATER_DROP_ICON = ft.Icons.WATER_DROP
+THUNDER_STORM_ICON = ft.Icons.THUNDERSTORM
+CLOUDY_SNOWING_ICON = ft.Icons.CLOUDY_SNOWING
+FOGGY_ICON = ft.Icons.FOGGY
+THERMOSTAT_ICON = ft.Icons.DEVICE_THERMOSTAT
+
 # Core constants
 WAKE_WORD = "аврора"
 EXIT_COMMAND = "exit"
@@ -52,58 +66,27 @@ PAUSE_THRESHOLD = 0.8  # секунди тиші, після яких фраза
 LANGUAGE = "uk-UA"
 TTS_LANGUAGE = "uk"
 
-# Weather Descriptions Translation
-WEATHER_DESCRIPTIONS_UK = {"sunny": "ясно", "partly cloudy": "частково хмарно", "cloudy": "хмарно",
-                           "overcast": "похмуро", "light rain": "невеликий дощ", "moderate rain": "помірний дощ",
-                           "heavy rain": "сильний дощ", "thunderstorm": "гроза", "snow": "сніг",
-                           "light snow": "невеликий сніг", "moderate snow": "помірний сніг",
-                           "heavy snow": "сильний сніг", "sleet": "мокрий сніг", "fog": "туман", "mist": "мряка",
-                           "haze": "димка", "drizzle": "мряка", "freezing rain": "крижаний дощ",
-                           "ice pellets": "крижана крупа", "flurries": "снігові заряди", "showers": "зливи",
-                           "scattered showers": "розсіяні зливи", "broken clouds": "розбиті хмари",
-                           "few clouds": "мало хмар", "light drizzle": "легка мряка", "heavy drizzle": "сильна мряка",
-                           "rain and drizzle": "дощ та мряка", "light freezing rain": "легкий крижаний дощ",
-                           "heavy freezing rain": "сильний крижаний дощ", "light snow showers": "легкі снігові зливи",
-                           "heavy snow showers": "сильні снігові зливи", "light rain showers": "легкі дощові зливи",
-                           "heavy rain showers": "сильні дощові зливи", "light thunderstorm": "легка гроза",
-                           "heavy thunderstorm": "сильна гроза",
-                           "thunderstorm with light rain": "гроза з невеликим дощем",
-                           "thunderstorm with heavy rain": "гроза з сильним дощем",
-                           "thunderstorm with rain": "гроза з дощем",
-                           "thunderstorm with light drizzle": "гроза з легкою мрякою",
-                           "thunderstorm with heavy drizzle": "гроза з сильною мрякою",
-                           "thunderstorm with drizzle": "гроза з мрякою", "squalls": "шквали", "tornado": "торнадо",
-                           "dust": "пил", "sand": "пісок", "volcanic ash": "вулканічний попіл", "smoke": "дим",
-                           "hail": "град", "windy": "вітряно", "cold": "холодно", "hot": "спекотно",
-                           "calm": "безвітряно", "breezy": "легкий вітерець", "gale": "шторм", "storm": "шторм",
-                           "hurricane": "ураган", "tropical storm": "тропічний шторм", "blizzard": "хуртовина",
-                           "freezing fog": "крижаний туман", "widespread dust": "розповсюджений пил",
-                           "sandstorm": "піщана буря", "light rain and snow": "невеликий дощ зі снігом",
-                           "rain and snow": "дощ зі снігом", "heavy rain and snow": "сильний дощ зі снігом",
-                           "light snow and rain": "невеликий сніг з дощем", "snow and rain": "сніг з дощем",
-                           "heavy snow and rain": "сильний сніг з дощем",
-                           "light showers of snow": "легкі снігові зливи", "showers of snow": "снігові зливи",
-                           "heavy showers of snow": "сильні снігові зливи",
-                           "light showers of rain": "легкі дощові зливи", "showers of rain": "дощові зливи",
-                           "heavy showers of rain": "сильні дощові зливи",
-                           "light showers of sleet": "легкі зливи мокрого снігу",
-                           "showers of sleet": "зливи мокрого снігу",
-                           "heavy showers of sleet": "сильні зливи мокрого снігу",
-                           "light showers of ice pellets": "легкі зливи крижаної крупи",
-                           "showers of ice pellets": "зливи крижаної крупи",
-                           "heavy showers of ice pellets": "сильні зливи крижаної крупи",
-                           "light hail showers": "легкі градові зливи", "hail showers": "градові зливи",
-                           "heavy hail showers": "сильні градові зливи",
-                           "light thunderstorm with hail": "легка гроза з градом",
-                           "thunderstorm with hail": "гроза з градом",
-                           "heavy thunderstorm with hail": "сильна гроза з градом",
-                           "partly cloudy with rain": "частково хмарно з дощем", "cloudy with rain": "хмарно з дощем",
-                           "overcast with rain": "похмуро з дощем",
-                           "partly cloudy with snow": "частково хмарно зі снігом",
-                           "cloudy with snow": "хмарно зі снігом", "overcast with snow": "похмуро зі снігом",
-                           "partly cloudy with thunderstorm": "частково хмарно з грозою",
-                           "cloudy with thunderstorm": "хмарно з грозою",
-                           "overcast with thunderstorm": "похмуро з грозою", }
+# Icons of weather
+WEATHER_ICONS = {
+    "ясно": SUNNY_ICON,
+    "сонячно": SUNNY_ICON,
+    "мінлива хмарність": CLOUDY_ICON,
+    "хмарно": CLOUDY_ICON,
+    "похмуро": CLOUDY_ICON,
+    "туман": FOGGY_ICON,
+    "мгла": FOGGY_ICON,
+    "дощ": WATER_DROP_ICON,
+    "легкий дощ": WATER_DROP_ICON,
+    "злива": THUNDER_STORM_ICON,
+    "гроза": THUNDER_STORM_ICON,
+    "сніг": CLOUDY_SNOWING_ICON,
+    "легкий сніг": CLOUDY_SNOWING_ICON,
+    "мокрий сніг": CLOUDY_SNOWING_ICON,
+    "хуртовина": CLOUDY_SNOWING_ICON,
+    "град": CLOUDY_SNOWING_ICON,
+    "невеликий дощ з грозою": THUNDER_STORM_ICON,
+    "дощ зі снігом": CLOUDY_SNOWING_ICON,
+}
 
 # Keys translation
 KEYS_EN = {"й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i", "щ": "o", "з": "p", "х": "[",
@@ -227,6 +210,7 @@ THEME_SWITCH_LABEL = "Темна тема"
 ACCENT_COLOR_LABEL = "Акцентний колір"
 DEVELOPED_BY_LABEL = "#### Розроблено CHRONOiS"
 CONTACT_US_LABEL = "#### Якщо виникнуть якісь питання звяжіться з нами за допомогою телеграму: @Chronos4"
+WEATHER_HEADER_LABEL = "Прогноз погоди в місті {}"
 
 CUSTOM_COMMANDS_HELP_LABEL = """
 ### Як додати власні команди:
@@ -265,13 +249,6 @@ MULTIPLE_COMMAND_VARIANTS_HELP_LABEL = """
     
 Побачити варіації крманд можливо якщо навестися на команду. 
 """
-
-# UI Icons
-INFO_ICON = ft.Icons.INFO
-SETTINGS_ICON = ft.Icons.SETTINGS
-MIC_ICON = ft.Icons.MIC_NONE
-LOADING_ICON = ft.Icons.AUTORENEW_ROUNDED
-SPEAKING_ICON = ft.Icons.VOLUME_UP_OUTLINED
 
 # Alignments
 ALIGN_LEFT = "left"

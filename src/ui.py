@@ -569,10 +569,8 @@ class UI:
         self.page.update()
 
     def _create_chat_message(self, text, user, message_id=None):
-        # Отримуємо поточну тему
         active_theme = self.page.dark_theme if self.page.theme_mode == ft.ThemeMode.DARK else self.page.theme
 
-        # Спробуємо отримати кольорову схему
         try:
             color_scheme = active_theme.color_scheme
             if color_scheme is None:
@@ -647,9 +645,26 @@ class UI:
         alignment = (
             ft.MainAxisAlignment.END if user == const.USER_ROLE else ft.MainAxisAlignment.START if user == const.PROGRAM_ROLE else ft.MainAxisAlignment.CENTER)
 
-        new_message = ft.Row(alignment=alignment, controls=[
-            ft.Container(content=ft.Column(controls=[author, text_widget], spacing=5), bgcolor=bubble_color, border_radius=10, padding=10, margin=5, expand=True,
-                         expand_loose=True)])
+        if text.startswith("Прогноз погоди"):
+            text_split = text.split(".")
+            weather_type = text_split[1].replace(" На небі ", "").lower()
+            temperature = text_split[0].split(":")[1].split(" ")[2]
+            weather_icon = const.WEATHER_ICONS.get(weather_type, const.INFO_ICON)
+            forecast_sample = ft.Container(ft.Column(controls=[
+                ft.Text(const.WEATHER_HEADER_LABEL.format(self.settings.get("city", "")), text_align=const.ALIGN_CENTER,
+                        size=15), ft.Row(controls=[ft.Icon(weather_icon, size=35, tooltip=weather_type)], spacing=20),
+                ft.Row(controls=[ft.Icon(const.THERMOSTAT_ICON, size=35, tooltip="Температура"),
+                                 ft.Text(f": {temperature}℃", size=35, text_align=const.ALIGN_LEFT)]),
+                ft.Text(f"{weather_type}, температура {temperature}℃", size=15, text_align=const.ALIGN_LEFT)], spacing=10),
+                expand=True, expand_loose=True)
+
+            new_message = ft.Row(alignment=alignment, controls=[
+                ft.Container(content=ft.Column(controls=[author, forecast_sample], spacing=5), bgcolor=bubble_color,
+                             border_radius=10, padding=10, margin=5, expand=True, expand_loose=True)])
+        else:
+            new_message = ft.Row(alignment=alignment, controls=[
+                ft.Container(content=ft.Column(controls=[author, text_widget], spacing=5), bgcolor=bubble_color,
+                             border_radius=10, padding=10, margin=5, expand=True, expand_loose=True)])
 
         if message_id:
             new_message.data = message_id
