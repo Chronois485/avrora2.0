@@ -153,7 +153,7 @@ class UI:
         self.page.theme = ft.Theme(color_scheme_seed=accent_color, font_family=const.FONT_FAMILY)
         self.page.dark_theme = ft.Theme(color_scheme_seed=accent_color, font_family=const.FONT_FAMILY)
 
-        # Set initial theme based on settings
+
         self.page.theme_mode = ft.ThemeMode.DARK if self.settings.get("theme") == "dark" else ft.ThemeMode.LIGHT
 
         self.settingsMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(0, -0.23),
@@ -249,7 +249,7 @@ class UI:
         self.infoB = ft.IconButton(icon=const.INFO_ICON, icon_size=20, tooltip="Команди", on_click=self.openInfo,
                                    offset=ft.Offset(0, -1))
 
-        self.settingsB = ft.IconButton(icon=const.SETTINGS_ICON, icon_size=20, tooltip="Налаштування",  # type: ignore
+        self.settingsB = ft.IconButton(icon=const.SETTINGS_ICON, icon_size=20, tooltip="Налаштування",
                                        on_click=self.openSetings, offset=ft.Offset(0, -1))
 
         self.CCmLabel = ft.TextField(value=const.CUSTOM_COMMANDS_LABEL, text_align="center", border_width=0,
@@ -314,7 +314,7 @@ class UI:
             This ensures that components have the correct colors on the first launch.
             """
             await self.apply_and_update_theme()
-            self.page.on_mount = None  # Run only once
+            self.page.on_mount = None
 
         self.page.on_mount = _apply_theme_on_mount
 
@@ -360,7 +360,7 @@ class UI:
 
     async def apply_and_update_theme(self):
         """Застосовує тему та оновлює чат"""
-        # Очікуємо ініціалізацію теми
+
         await self.wait_for_theme_initialization()
 
         self._apply_theme_colors()
@@ -422,7 +422,7 @@ class UI:
             os.remove(const.SETTINGS_FILENAME)
         self.YourNameI.value = ""
         self.useTGOnlineCB.value = False
-        self.TGPath.value = ""  # type: ignore
+        self.TGPath.value = ""
         self.musicLinkI.value = ""
         self.permisionsToControlPCPowerCB.value = False
         self.CityI.value = ""
@@ -448,10 +448,10 @@ class UI:
         self.settings['theme'] = new_theme_str
         await avroraCore.save_settings(self.settings)
 
-        # Очікуємо ініціалізацію теми
+
         await self.wait_for_theme_initialization()
 
-        # Оновлюємо всі повідомлення в чаті
+
         self.update_chat_from_history()
         await self.apply_and_update_theme()
 
@@ -468,10 +468,10 @@ class UI:
         self.settings['accent_color'] = color_value
         await avroraCore.save_settings(self.settings)
 
-        # Очікуємо ініціалізацію теми
+
         await self.wait_for_theme_initialization()
 
-        # Оновлюємо всі повідомлення в чаті
+
         self.update_chat_from_history()
         self.page.update()
         await self.apply_and_update_theme()
@@ -576,7 +576,7 @@ class UI:
             if color_scheme is None:
                 raise AttributeError("Color scheme is None")
 
-            # Використовуємо кольори з теми
+
             if user == const.USER_ROLE:
                 bubble_color = color_scheme.primary_container
                 text_color = color_scheme.on_primary_container
@@ -600,7 +600,7 @@ class UI:
                 bubble_color = fallback_colors["system_bubble"]
                 text_color = fallback_colors["system_text"]
 
-        # Решта коду залишається без змін
+
         url_pattern = re.compile(r"https?://\S+")
         spans = []
 
@@ -645,7 +645,7 @@ class UI:
         alignment = (
             ft.MainAxisAlignment.END if user == const.USER_ROLE else ft.MainAxisAlignment.START if user == const.PROGRAM_ROLE else ft.MainAxisAlignment.CENTER)
 
-        if text.startswith("Прогноз погоди"):
+        if text.startswith("Прогноз погоди") and user == const.PROGRAM_ROLE:
             text_split = text.split(".")
             weather_type = text_split[1].replace(" На небі ", "").lower()
             temperature = text_split[0].split(":")[1].split(" ")[2]
@@ -661,6 +661,36 @@ class UI:
             new_message = ft.Row(alignment=alignment, controls=[
                 ft.Container(content=ft.Column(controls=[author, forecast_sample], spacing=5), bgcolor=bubble_color,
                              border_radius=10, padding=10, margin=5, expand=True, expand_loose=True)])
+
+        elif text.startswith("Ось останні ") and user == const.PROGRAM_ROLE:
+            text_split = text.split("\n")
+            text_widget = [author]
+            for i in range(0, len(text_split)):
+                if len(text_split[i]) > 1:
+                    spans = []
+                    if text_split[i][1] == ".":
+                        text_widget.append(ft.Text(value=text_split[i], selectable=True, text_align=const.ALIGN_LEFT))
+                        text_widget.append(ft.Divider(height=1, thickness=3, color=ft.Colors.PRIMARY))
+                    elif url_pattern.search(text_split[i]):
+                        last_end = 0
+                        for match in url_pattern.finditer(text_split[i]):
+                            start, end = match.span()
+                            url = match.group(0)
+                            if start > last_end:
+                                spans.append(ft.TextSpan(text_split[i][last_end:start], ft.TextStyle(color=text_color)))
+                            spans.append(
+                                ft.TextSpan(url, ft.TextStyle(color=ft.Colors.BLUE_400, decoration=ft.TextDecoration.UNDERLINE),
+                                            url=url))
+                            last_end = end
+                        if last_end < len(text_split[i]):
+                            spans.append(ft.TextSpan(text_split[i][last_end:], ft.TextStyle(color=text_color)))
+                        text_widget.append(ft.Text(spans=spans, selectable=True, text_align=const.ALIGN_LEFT))
+                    else:
+                        text_widget.append(ft.Text(value=text_split[i], selectable=True, text_align=const.ALIGN_LEFT))
+            new_message = ft.Row(alignment=alignment, controls=[
+                ft.Container(content=ft.Column(controls=text_widget, spacing=5), bgcolor=bubble_color,
+                             border_radius=10, padding=10, margin=5, expand=True, expand_loose=True)])
+
         else:
             new_message = ft.Row(alignment=alignment, controls=[
                 ft.Container(content=ft.Column(controls=[author, text_widget], spacing=5), bgcolor=bubble_color,
