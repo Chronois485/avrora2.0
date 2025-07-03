@@ -175,13 +175,12 @@ class UI:
         self.customCommandsHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
 
         self.conntactUsHelp = ft.Markdown(const.CONTACT_US_LABEL, selectable=True,
-                                              extension_set=const.MARKDOWN_EXTENSION_SET,
-                                              code_theme=const.MARKDOWN_CODE_THEME)
+                                          extension_set=const.MARKDOWN_EXTENSION_SET,
+                                          code_theme=const.MARKDOWN_CODE_THEME)
         self.conntactUsHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
 
         self.madeByHelp = ft.Markdown(const.DEVELOPED_BY_LABEL, selectable=True,
-                                      extension_set=const.MARKDOWN_EXTENSION_SET,
-                                      code_theme=const.MARKDOWN_CODE_THEME)
+                                      extension_set=const.MARKDOWN_EXTENSION_SET, code_theme=const.MARKDOWN_CODE_THEME)
         self.madeByHelp.code_block_style = ft.TextStyle(font_family=const.FONT_FAMILY)
 
         self.infoMenuDivider = ft.Divider(height=1, thickness=2)
@@ -194,7 +193,8 @@ class UI:
         self.nameCol = ft.Column(spacing=10, controls=[self.nameT, self.nameTlow, self.statusIcon])
         self.infoMenu.content = ft.Column(
             controls=[self.infoHeader, self.infoTable, self.infoMenuDivider, self.multipleCommandsHelp,
-                      self.infoMenuDivider, self.customCommandsHelp, self.infoMenuDivider, self.conntactUsHelp, self.infoMenuDivider,self.madeByHelp], scroll=const.SCROLL_MODE_AUTO)
+                      self.infoMenuDivider, self.customCommandsHelp, self.infoMenuDivider, self.conntactUsHelp,
+                      self.infoMenuDivider, self.madeByHelp], scroll=const.SCROLL_MODE_AUTO)
         self.msgs = list()
         self.msgsCol = ft.Column(controls=self.msgs, scroll=const.SCROLL_MODE_AUTO)
         self.msgsBox = ft.Container(content=self.msgsCol, width=420, height=420)
@@ -329,6 +329,7 @@ class UI:
 
     def _apply_theme_colors(self):
         """Applies colors to all relevant UI elements based on the current theme."""
+        logging.info("Applying theme colors.")
         if not hasattr(self.page, 'theme') or not hasattr(self.page, 'dark_theme'):
             return
 
@@ -359,12 +360,8 @@ class UI:
 
     async def apply_and_update_theme(self):
         """Застосовує тему та оновлює чат"""
-        for _ in range(10):
-            if hasattr(self.page, 'theme') and hasattr(self.page.theme, 'color_scheme'):
-                break
-            await asyncio.sleep(0.1)
-        else:
-            logging.warning("Theme initialization timeout - using default colors")
+        # Очікуємо ініціалізацію теми
+        await self.wait_for_theme_initialization()
 
         self._apply_theme_colors()
         self.update_chat_from_history()
@@ -434,6 +431,14 @@ class UI:
         logging.info("Settings have been reset to default.")
         self.page.update()
 
+    async def wait_for_theme_initialization(self, max_attempts=10, delay=0.1):
+        """Чекає, доки тема буде повністю ініціалізована."""
+        for _ in range(max_attempts):
+            if hasattr(self.page, 'theme') and hasattr(self.page.theme, 'color_scheme'):
+                return True
+            await asyncio.sleep(delay)
+        return False
+
     async def switch_theme(self, e):
         """Handles the theme switch, updates the page, and saves the setting."""
         new_theme_str = "dark" if self.themeS.value else "light"
@@ -442,6 +447,12 @@ class UI:
 
         self.settings['theme'] = new_theme_str
         await avroraCore.save_settings(self.settings)
+
+        # Очікуємо ініціалізацію теми
+        await self.wait_for_theme_initialization()
+
+        # Оновлюємо всі повідомлення в чаті
+        self.update_chat_from_history()
         await self.apply_and_update_theme()
 
     async def switch_accent_color(self, e):
@@ -450,16 +461,18 @@ class UI:
         color_value = const.ACCENT_COLORS[color_name]
         logging.info(f"Accent color switched to {color_name}.")
 
-        # Set the new seed color
         self.page.theme.color_scheme_seed = color_value
         self.page.dark_theme.color_scheme_seed = color_value
 
-        # Save settings
         self.settings['accent_color_name'] = color_name
         self.settings['accent_color'] = color_value
         await avroraCore.save_settings(self.settings)
 
-        # First update to generate the new color scheme, then apply it
+        # Очікуємо ініціалізацію теми
+        await self.wait_for_theme_initialization()
+
+        # Оновлюємо всі повідомлення в чаті
+        self.update_chat_from_history()
         self.page.update()
         await self.apply_and_update_theme()
 
@@ -517,8 +530,6 @@ class UI:
     async def on_file_selected(self, e: ft.FilePickerResultEvent):
         if self.file_picker.result and self.file_picker.result.files:
             selected_file = self.file_picker.result.files[0].path
-            # Оновлюємо словник налаштувань у пам'яті, а потім викликаємо update_settings,
-            # який обробляє збереження у файл та оновлення всіх елементів UI.
             self.settings["tgpath"] = selected_file
             await self.update_settings(None)
 
@@ -558,24 +569,29 @@ class UI:
         self.page.update()
 
     def _create_chat_message(self, text, user, message_id=None):
-        # Резервні кольори на випадок, якщо тема ще не завантажена
-        fallback_colors = const.CHAT_FALLBACK_COLORS
+        # Отримуємо поточну тему
+        active_theme = self.page.dark_theme if self.page.theme_mode == ft.ThemeMode.DARK else self.page.theme
 
-        # Спробувати отримати кольорову схему
+        # Спробуємо отримати кольорову схему
         try:
-            active_theme = self.page.dark_theme if self.page.theme_mode == ft.ThemeMode.DARK else self.page.theme
-            color_scheme = active_theme.color_scheme if active_theme else None
+            color_scheme = active_theme.color_scheme
+            if color_scheme is None:
+                raise AttributeError("Color scheme is None")
 
-            if not color_scheme:
-                raise AttributeError("Color scheme not available")
+            # Використовуємо кольори з теми
+            if user == const.USER_ROLE:
+                bubble_color = color_scheme.primary_container
+                text_color = color_scheme.on_primary_container
+            elif user == const.PROGRAM_ROLE:
+                bubble_color = color_scheme.secondary_container
+                text_color = color_scheme.on_secondary_container
+            else:
+                bubble_color = color_scheme.tertiary_container
+                text_color = color_scheme.on_tertiary_container
 
-            # Кольори з теми
-            bubble_color = (
-                color_scheme.primary_container if user == const.USER_ROLE else color_scheme.secondary_container if user == const.PROGRAM_ROLE else color_scheme.tertiary_container)
-            text_color = (
-                color_scheme.on_primary_container if user == const.USER_ROLE else color_scheme.on_secondary_container if user == const.PROGRAM_ROLE else color_scheme.on_tertiary_container)
         except Exception as e:
-            logging.warning(f"Using fallback colors: {e}")
+            logging.warning(f"Failed to get colors from theme: {e}, using fallback colors")
+            fallback_colors = const.CHAT_FALLBACK_COLORS
             if user == const.USER_ROLE:
                 bubble_color = fallback_colors["user_bubble"]
                 text_color = fallback_colors["user_text"]
@@ -586,6 +602,7 @@ class UI:
                 bubble_color = fallback_colors["system_bubble"]
                 text_color = fallback_colors["system_text"]
 
+        # Решта коду залишається без змін
         url_pattern = re.compile(r"https?://\S+")
         spans = []
 
@@ -602,16 +619,37 @@ class UI:
                 last_end = end
             if last_end < len(text):
                 spans.append(ft.TextSpan(text[last_end:], ft.TextStyle(color=text_color)))
-            text_widget = ft.Text(spans=spans, width=380, selectable=True)
+            if user == const.USER_ROLE:
+                text_widget = ft.Text(spans=spans, selectable=True, text_align=const.ALIGN_RIGHT,
+                                      overflow=ft.TextOverflow.CLIP)
+            elif user == const.PROGRAM_ROLE:
+                text_widget = ft.Text(spans=spans, selectable=True, text_align=const.ALIGN_LEFT,
+                                      overflow=ft.TextOverflow.CLIP)
+            else:
+                text_widget = ft.Text(spans=spans, selectable=True, text_align=const.ALIGN_CENTER,
+                                      overflow=ft.TextOverflow.CLIP)
         else:
-            text_widget = ft.Text(value=text, width=380, selectable=True, color=text_color)
+            if user == const.USER_ROLE:
+                text_widget = ft.Text(value=text, selectable=True, text_align=const.ALIGN_RIGHT,
+                                      overflow=ft.TextOverflow.CLIP)
+            elif user == const.PROGRAM_ROLE:
+                text_widget = ft.Text(value=text, selectable=True, text_align=const.ALIGN_LEFT,
+                                      overflow=ft.TextOverflow.CLIP)
+            else:
+                text_widget = ft.Text(value=text, selectable=True, text_align=const.ALIGN_CENTER,
+                                      overflow=ft.TextOverflow.CLIP)
+        author = ft.Text(text_align=const.ALIGN_LEFT, selectable=True, weight=ft.FontWeight.BOLD)
+        if user == const.USER_ROLE:
+            author.value = self.settings.get('name', '')
+        elif user == const.PROGRAM_ROLE:
+            author.value = const.APP_NAME
 
         alignment = (
             ft.MainAxisAlignment.END if user == const.USER_ROLE else ft.MainAxisAlignment.START if user == const.PROGRAM_ROLE else ft.MainAxisAlignment.CENTER)
 
-        # Створення повідомлення
         new_message = ft.Row(alignment=alignment, controls=[
-            ft.Container(content=text_widget, bgcolor=bubble_color, border_radius=10, padding=10, margin=5)])
+            ft.Container(content=ft.Column(controls=[author, text_widget], spacing=5), bgcolor=bubble_color, border_radius=10, padding=10, margin=5, expand=True,
+                         expand_loose=True)])
 
         if message_id:
             new_message.data = message_id

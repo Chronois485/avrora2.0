@@ -24,9 +24,9 @@ ACCENT_COLORS = {"Deep Purple": ft.Colors.DEEP_PURPLE_400, "Indigo": ft.Colors.I
                  "Teal": ft.Colors.TEAL_400, "Green": ft.Colors.GREEN_400, "Orange": ft.Colors.ORANGE_400,
                  "Pink": ft.Colors.PINK_400, }
 
-CHAT_FALLBACK_COLORS = {"user_bubble": ft.Colors.BLUE_200, "user_text": ft.Colors.BLACK,
-                        "bot_bubble": ft.Colors.GREY_300, "bot_text": ft.Colors.BLACK,
-                        "system_bubble": ft.Colors.AMBER_100, "system_text": ft.Colors.BLACK}
+CHAT_FALLBACK_COLORS = {"user_bubble": ft.Colors.PRIMARY_CONTAINER, "user_text": ft.Colors.ON_PRIMARY_CONTAINER,
+                        "bot_bubble": ft.Colors.SECONDARY_CONTAINER, "bot_text": ft.Colors.ON_SECONDARY_CONTAINER,
+                        "system_bubble": ft.Colors.TERTIARY_CONTAINER, "system_text": ft.Colors.ON_TERTIARY_CONTAINER}
 
 # Logging
 LOG_FILENAME = "avrora.log"
