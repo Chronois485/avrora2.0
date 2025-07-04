@@ -8,7 +8,7 @@ import flet as ft
 DEEP_PURPLE_400 = ft.Colors.DEEP_PURPLE_400
 PURPLE_400 = ft.Colors.PURPLE_400
 DEEP_PURPLE_500 = ft.Colors.DEEP_PURPLE_500
-INITIONAL_COLOR = ft.Colors.SURFACE_CONTAINER_HIGHEST
+INITIATION_COLOR = ft.Colors.SURFACE_CONTAINER_HIGHEST
 
 # Theme Colors
 THEME_DARK = "dark"
@@ -68,11 +68,12 @@ TTS_LANGUAGE = "uk"
 
 # Icons of weather
 WEATHER_ICONS = {"ясно": SUNNY_ICON, "сонячно": SUNNY_ICON, "мінлива хмарність": CLOUDY_ICON, "хмарно": CLOUDY_ICON,
-    "похмуро": CLOUDY_ICON, "туман": FOGGY_ICON, "мгла": FOGGY_ICON, "дощ": WATER_DROP_ICON,
-    "легкий дощ": WATER_DROP_ICON, "злива": THUNDER_STORM_ICON, "гроза": THUNDER_STORM_ICON,
-    "сніг": CLOUDY_SNOWING_ICON, "легкий сніг": CLOUDY_SNOWING_ICON, "мокрий сніг": CLOUDY_SNOWING_ICON,
-    "хуртовина": CLOUDY_SNOWING_ICON, "град": CLOUDY_SNOWING_ICON, "невеликий дощ з грозою": THUNDER_STORM_ICON,
-    "дощ зі снігом": CLOUDY_SNOWING_ICON, }
+                 "похмуро": CLOUDY_ICON, "туман": FOGGY_ICON, "мгла": FOGGY_ICON, "дощ": WATER_DROP_ICON,
+                 "легкий дощ": WATER_DROP_ICON, "злива": THUNDER_STORM_ICON, "гроза": THUNDER_STORM_ICON,
+                 "сніг": CLOUDY_SNOWING_ICON, "легкий сніг": CLOUDY_SNOWING_ICON, "мокрий сніг": CLOUDY_SNOWING_ICON,
+                 "хуртовина": CLOUDY_SNOWING_ICON, "град": CLOUDY_SNOWING_ICON,
+                 "невеликий дощ з грозою": THUNDER_STORM_ICON, "дощ зі снігом": CLOUDY_SNOWING_ICON,
+                 "змінна хмарність": CLOUDY_ICON}
 
 # Keys translation
 KEYS_EN = {"й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i", "щ": "o", "з": "p", "х": "[",
@@ -108,8 +109,8 @@ def get_user_data_path(filename):
 SETTINGS_FILENAME = get_user_data_path("settings.json")
 CUSTOM_COMMANDS_FILENAME = get_user_data_path("customCommands.json")
 CHAT_HISTORY_FILENAME = get_user_data_path("chat_history.json")
-INFO_TABLE_FILENAME = get_user_data_path("comandsTable.json")
-DEFAULT_INFO_TABLE_FILENAME = get_resource_path("assets/comandsTable.json")
+INFO_TABLE_FILENAME = get_user_data_path("commandsTable.json")
+DEFAULT_INFO_TABLE_FILENAME = get_resource_path("assets/commandsTable.json")
 TODO_LIST_FILENAME = get_user_data_path("todoList.txt")
 
 # TTS output should go to a temporary directory
@@ -169,7 +170,7 @@ SELECT_TG_FILE_LABEL = "Вибрати файл Телеграму"
 RESET_SETTINGS_BUTTON_LABEL = "Скинути налаштування"
 DELETE_CC_LABEL = "Видалити дію"
 CONFIRM_CC_LABEL = "Підтвердити"
-CANCEL_CC_LABEL = "Cкасувати"
+CANCEL_CC_LABEL = "Скасувати"
 NEW_COMMAND_LABEL = "Нова команда"
 COMMAND_NAME_LABEL = "Ім'я команди"
 COMMAND_ACTION_LABEL = "Дія"
@@ -233,7 +234,7 @@ MULTIPLE_COMMAND_VARIANTS_HELP_LABEL = """
 **Приклад:**
     включи музику*
     
-Побачити варіації крманд можливо якщо навестися на команду. 
+Побачити варіації команд можливо якщо навестися на команду. 
 """
 
 # Alignments
@@ -348,7 +349,7 @@ RESPONSE_TURNING_ON_SONG_ON_YTM = "Вмикаю {} на YouTube Music, {}"
 RESPONSE_SONG_NOT_FOUND = "На жаль, не вдалося знайти пісню {}."
 RESPONSE_MEASURING_CPU = "заміряю {}"
 RESPONSE_CPU_LOAD = "{}% {}"
-RESPONSE_RAM_LOAD = "Використанно {}%. всього пам'яті {:.2f} гігабайти. доступно пам'яті {:.2f} гігабайти"
+RESPONSE_RAM_LOAD = "Використано {}%. всього пам'яті {:.2f} гігабайти. доступно пам'яті {:.2f} гігабайти"
 RESPONSE_CURRENT_TIME = "{}, зараз {}:{}:{}"
 RESPONSE_SEARCHING_NEWS = "Шукаю новини, {}"
 RESPONSE_LATEST_NEWS = "Ось останні {} новин: \n"
@@ -399,8 +400,8 @@ RESPONSE_TODO_LIST_NOT_FOUND = "Список справ не знайдено, �
 RESPONSE_ADD_TODO = "Додаю {} до списку справ, {}"
 RESPONSE_ADD_TODO_EXISTS = "Не вдалося додати до списку справ, пункт {} уже існує"
 RESPONSE_REMOVE_TODO = "Видаляю з списку справ, {}"
-RESPONSE_REMOVE_TODO_NOT_FOUND = "Не вдалося видалити з списку справ, {}, такого пунку не існує"
-RESPONSE_CLEAR_TODO = "Очищюю список справ, {}"
+RESPONSE_REMOVE_TODO_NOT_FOUND = "Не вдалося видалити з списку справ, {}, такого пункту не існує"
+RESPONSE_CLEAR_TODO = "Очищую список справ, {}"
 RESPONSE_PAUSE_SONG = "Призупиняю, {}"
 RESPONSE_RESUME_SONG = "Відновлюю, {}"
 RESPONSE_NEXT_SONG = "Наступний трек, {}"

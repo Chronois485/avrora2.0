@@ -342,6 +342,7 @@ async def tts(text, output=const.TTS_OUTPUT, on_status_change=None):
 
 def _tts(text, output):
     """Озвучує текст"""
+
     def _speak():
         try:
             ans = gTTS(text=text, lang=const.TTS_LANGUAGE, slow=False)

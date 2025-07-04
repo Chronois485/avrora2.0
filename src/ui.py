@@ -156,7 +156,7 @@ class UI:
         self.page.theme_mode = ft.ThemeMode.DARK if self.settings.get("theme") == "dark" else ft.ThemeMode.LIGHT
 
         self.settingsMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(0, -0.23),
-                                         bgcolor=const.INITIONAL_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
+                                         bgcolor=const.INITIATION_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
                                          animate_offset=ft.Animation(250), padding=10)
 
         self.infoHeader = ft.Text(const.INFO_HEADER_LABEL, size=10)
@@ -185,7 +185,7 @@ class UI:
         self.infoMenuDivider = ft.Divider(height=1, thickness=2)
 
         self.infoMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(-2.08, -0.23),
-                                     bgcolor=const.INITIONAL_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
+                                     bgcolor=const.INITIATION_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
                                      animate_offset=ft.Animation(250), padding=10)
         self.nameTlow = ft.Text(value=const.APP_FULL_NAME, text_align="center", width=160)
         self.nameT = ft.Text(value=const.APP_NAME, text_align="center", width=160, size=29)
@@ -249,7 +249,7 @@ class UI:
                                    offset=ft.Offset(0, -1))
 
         self.settingsB = ft.IconButton(icon=const.SETTINGS_ICON, icon_size=20, tooltip="Налаштування",
-                                       on_click=self.openSetings, offset=ft.Offset(0, -1))
+                                       on_click=self.openSettings, offset=ft.Offset(0, -1))
 
         self.CCmLabel = ft.TextField(value=const.CUSTOM_COMMANDS_LABEL, text_align="center", border_width=0,
                                      border_radius=10, disabled=True)
@@ -257,7 +257,7 @@ class UI:
         self.CCmDropdownOptions = [ft.dropdown.Option("", text=const.NEW_COMMAND_LABEL)]
 
         self.CCmDropdown = ft.Dropdown(label=const.DROPDOWN_CHOOSE_COMMAND_LABEL, options=self.CCmDropdownOptions,
-                                       on_change=self.on_CC_choosed)
+                                       on_change=self.on_CC_chosen)
 
         self.CCmNameI = ft.TextField(label=const.COMMAND_NAME_LABEL, value="", expand=False, disabled=False,
                                      visible=True, )
@@ -267,23 +267,23 @@ class UI:
 
         self.CCmDeleteB = ft.ElevatedButton(text=const.DELETE_CC_LABEL, width=150, height=30, on_click=self.delete_CC)
 
-        self.CCmSumbitB = ft.ElevatedButton(text=const.CONFIRM_CC_LABEL, width=180, height=30, on_click=self.accept_CCm)
+        self.CCmSubmitB = ft.ElevatedButton(text=const.CONFIRM_CC_LABEL, width=180, height=30, on_click=self.accept_CCm)
 
-        self.CCmCanceltB = ft.ElevatedButton(text=const.CANCEL_CC_LABEL, width=180, height=30, on_click=self.close_CCm)
+        self.CCmCancelB = ft.ElevatedButton(text=const.CANCEL_CC_LABEL, width=180, height=30, on_click=self.close_CCm)
 
-        self.CCmButtonsRow = ft.Row(spacing=20, controls=[self.CCmSumbitB, self.CCmCanceltB], alignment="center")
+        self.CCmButtonsRow = ft.Row(spacing=20, controls=[self.CCmSubmitB, self.CCmCancelB], alignment="center")
 
         self.CCmCol = ft.Column(spacing=10, controls=[self.CCmLabel, self.CCmDropdown, self.CCmNameI, self.CCmActionI,
                                                       self.CCmDeleteB, self.CCmButtonsRow])
 
         self.CCm = ft.Container(width=425, height=510, border_radius=10, padding=10, alignment=ft.alignment.center,
-                                content=self.CCmCol, animate_offset=ft.Animation(250), bgcolor=const.INITIONAL_COLOR,
+                                content=self.CCmCol, animate_offset=ft.Animation(250), bgcolor=const.INITIATION_COLOR,
                                 border=ft.border.all(2, ft.Colors.PRIMARY), offset=ft.Offset(-1.03, -1.25))
 
         self.CCmOpen = ft.ElevatedButton(text=const.CUSTOM_COMMANDS_BUTTON_LABEL, width=200, height=30,
                                          on_click=self.open_CCm)
 
-        self.settignsDivider = ft.Divider(height=1, thickness=2)
+        self.settingsDivider = ft.Divider(height=1, thickness=2)
         self.settingsGroupTG = ft.Text(value=const.SETTINGS_GROUP_TG_LABEL, size=20, text_align="center")
         self.settingsGroupPersonalInfo = ft.Text(value=const.SETTINGS_GROUP_PERSONAL_INFO_LABEL, size=20,
                                                  text_align="center")
@@ -297,14 +297,14 @@ class UI:
         self.settingsCol = ft.Column(spacing=10,
                                      controls=[self.passiveL, self.settingsGroupPersonalInfo, self.YourNameI,
                                                self.CityI, self.musicLinkI, self.NewsHeadersCountT,
-                                               self.NewsHeadersCountS, self.settignsDivider,
+                                               self.NewsHeadersCountS, self.settingsDivider,
                                                self.settingsGroupPersonalisation, self.themeS,
-                                               self.accent_color_dropdown, self.settignsDivider, self.settingsGroupTG,
-                                               self.TGPath, self.selectTGFile, self.useTGOnlineCB, self.settignsDivider,
+                                               self.accent_color_dropdown, self.settingsDivider, self.settingsGroupTG,
+                                               self.TGPath, self.selectTGFile, self.useTGOnlineCB, self.settingsDivider,
                                                self.settingsGroupPermissions, self.permisionsToControlPCPowerCB,
-                                               self.resetSettingsButton, self.settignsDivider, self.settingsGroupChat,
-                                               self.clearChatButton, self.settignsDivider, self.settingsGroupCC,
-                                               self.CCmOpen, self.settignsDivider], scroll="auto")
+                                               self.resetSettingsButton, self.settingsDivider, self.settingsGroupChat,
+                                               self.clearChatButton, self.settingsDivider, self.settingsGroupCC,
+                                               self.CCmOpen, self.settingsDivider], scroll="auto")
         self.settingsMenu.content = self.settingsCol
 
         async def _apply_theme_on_mount(e):
@@ -351,7 +351,7 @@ class UI:
         for icon_button in [self.infoB, self.settingsB, self.statusIcon]:
             icon_button.icon_color = color_scheme.primary
 
-        for divider in [self.settignsDivider, self.infoMenuDivider]:
+        for divider in [self.settingsDivider, self.infoMenuDivider]:
             divider.color = color_scheme.primary
 
         for text_field in [self.passiveL, self.CCmLabel]:
@@ -388,7 +388,7 @@ class UI:
         self.CCmDropdown.options = self.CCmDropdownOptions
         self.CCmDropdown.update()
 
-    def openSetings(self, e):
+    def openSettings(self, e):
         if not self.settings_is_open and not self.info_is_open:
             logging.info("Opening settings menu.")
             self.infoB.disabled = True
@@ -474,7 +474,7 @@ class UI:
     async def open_CCm(self, e):
         logging.info("Opening Custom Commands menu.")
         await self.update_settings(None)
-        self.openSetings(None)
+        self.openSettings(None)
         self.settingsB.disabled = True
         self.infoB.disabled = True
         self.CCm.offset = ft.Offset(0, -1.25)
@@ -485,7 +485,7 @@ class UI:
         self.CCm.offset = ft.Offset(-1.03, -1.25)
         self.settingsB.disabled = False
         self.infoB.disabled = False
-        self.openSetings(None)
+        self.openSettings(None)
 
     async def accept_CCm(self, e):
         if self.CCmNameI.value == "" or self.CCmNameI.value == " ":
@@ -528,7 +528,7 @@ class UI:
             self.settings["tgpath"] = selected_file
             await self.update_settings(None)
 
-    async def on_CC_choosed(self, e):
+    async def on_CC_chosen(self, e):
         chosen_command = self.CCmDropdown.value
         logging.info(f"Custom command chosen from dropdown: '{chosen_command}'")
         self.CCmNameI.value = self.CCmDropdown.value
