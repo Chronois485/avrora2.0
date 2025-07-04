@@ -187,7 +187,7 @@ class UI:
         self.infoMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(-2.08, -0.23),
                                      bgcolor=const.INITIATION_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
                                      animate_offset=ft.Animation(250), padding=10)
-        self.nameTlow = ft.Text(value=const.APP_FULL_NAME, text_align="center", width=160)
+        self.nameTlow = ft.Text(value=const.APP_FULL_NAME, text_align="center", width=160, size=10)
         self.nameT = ft.Text(value=const.APP_NAME, text_align="center", width=160, size=29)
         self.nameCol = ft.Column(spacing=10, controls=[self.nameT, self.nameTlow, self.statusIcon])
         self.infoMenu.content = ft.Column(
