@@ -157,7 +157,7 @@ ALLOWED_EXTENSIONS_EXE = ["exe"]
 
 # UI Text
 APP_NAME = "A.V.R.O.R.A."
-APP_FULL_NAME = "Artificial Virtual Robot Optimized for Reliable Assistance"
+APP_FULL_NAME = "Advanced Voice-Activated Robot for Optimized Reliable Assistance"
 SETTINGS_LABEL = "Налаштування"
 CUSTOM_COMMANDS_LABEL = "Користувацькі команди"
 YOUR_NAME_LABEL = "Ваше ім'я"
