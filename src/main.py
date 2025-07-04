@@ -14,6 +14,7 @@ logging.basicConfig(filename=const.LOG_FILENAME, level=logging.INFO,
 
 
 async def listen(page, ui_instance):
+    """Починає основний цикл прослуховування"""
     logging.info("Starting main listening loop.")
     action_after_loop = const.EXIT_COMMAND
     while True:
@@ -53,7 +54,7 @@ async def listen(page, ui_instance):
 
 
 async def start_app_flow(page, ui_instance):
-    """Основний потік програми після початкового налаштування/діалогу."""
+    """Запускає основний потік програми"""
     logging.info("Sending initial greeting.")
     _, result_message = await avroraCore.doSomething(f"{const.WAKE_WORD} {const.CMD_GREETING_VARIANTS[0]}", page,
                                                      on_status_change=ui_instance.animateStatus)
@@ -62,7 +63,7 @@ async def start_app_flow(page, ui_instance):
 
 
 async def build_and_run_main_app(page, ui_instance):
-    """Будує основний UI та запускає головний потік програми."""
+    """Створює і запускає основну програму"""
     await ui_instance.build_ui()
     logging.info("UI has been built.")
     await ui_instance.apply_and_update_theme()
@@ -71,10 +72,10 @@ async def build_and_run_main_app(page, ui_instance):
 
 
 async def main(page: ft.Page):
+    """Запускає програму"""
     logging.info("Application starting.")
 
     async def _start_app():
-        """Колбек для запуску після того, як користувач введе своє ім'я."""
         logging.info("Name provided, building main application UI.")
         await build_and_run_main_app(page, ui_instance)
 

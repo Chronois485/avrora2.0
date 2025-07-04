@@ -34,6 +34,7 @@ _PROGRAMS_CACHE_LOCK = asyncio.Lock()
 
 
 async def run_command(command):
+    """Виконує команду для терміналу"""
     logging.info(f"Executing system command: '{command}'")
     loop = asyncio.get_running_loop()
     process = await loop.run_in_executor(executor, os.system, command)
@@ -42,6 +43,7 @@ async def run_command(command):
 
 
 async def timer(duration, thing):
+    """Запускає таймер"""
     logging.info(f"Starting timer for {duration} seconds for: {thing}")
     await asyncio.sleep(duration)
     logging.info(f"Timer finished for: {thing}")
@@ -49,6 +51,7 @@ async def timer(duration, thing):
 
 
 def uk_to_en(text):
+    """Перетворює символи кирилиці в латинницю"""
     logging.info(f"Converting Ukrainian text to English: '{text}'")
     result = ""
     for symbol in text:
@@ -68,17 +71,20 @@ async def save_settings(settings, filename=const.SETTINGS_FILENAME):
 
 
 def _save_settings(settings, filename):
+    """Зберігає налаштування"""
     logging.debug(f"Writing settings to {filename}: {settings}")
     with open(filename, "w") as file:
         json.dump(settings, file)
 
 
 async def load_settings(filename=const.SETTINGS_FILENAME):
+    logging.info("Loading settings.")
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(executor, _load_settings, filename)
 
 
 def _load_settings(filename):
+    """Завантажує налаштування"""
     defaults = {"name": const.DEFAULT_NAME, "tgo": False, "tgpath": const.DEFAULT_TG_PATH,
                 "music": const.DEFAULT_MUSIC_LINK, "pcpower": False, "city": const.DEFAULT_CITY, "num_headlines": 5,
                 "theme": const.DEFAULT_THEME}
@@ -105,22 +111,24 @@ def _load_settings(filename):
     return final_settings
 
 
-async def save_CC(command, filename=const.CUSTOM_COMMANDS_FILENAME):
+async def save_cc(command, filename=const.CUSTOM_COMMANDS_FILENAME):
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(executor, _save_CC, command, filename)
+    await loop.run_in_executor(executor, _save_cc, command, filename)
 
 
-def _save_CC(command, filename):
+def _save_cc(command, filename):
+    """Зберігає користувацькі команди"""
     with open(filename, "w") as file:
         json.dump(command, file)
 
 
-async def load_CC(filename=const.CUSTOM_COMMANDS_FILENAME):
+async def load_cc(filename=const.CUSTOM_COMMANDS_FILENAME):
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(executor, _load_CC, filename)
+    return await loop.run_in_executor(executor, _load_cc, filename)
 
 
-def _load_CC(filename):
+def _load_cc(filename):
+    """Завантажує користувацькі команди"""
     if os.path.exists(filename):
         with open(filename, "r") as file:
             return json.load(file)
@@ -128,7 +136,7 @@ def _load_CC(filename):
 
 
 def _get_start_menu_dirs():
-    """Returns the paths to the user and common Start Menu Programs folders."""
+    """Отримує шляхи до користувача і стандартних каталогів з програмами"""
     if sys.platform != "win32":
         return []
 
@@ -143,7 +151,7 @@ def _get_start_menu_dirs():
 
 
 def _scan_programs():
-    """Scans Start Menu directories for applications and returns a dictionary."""
+    """Сканує типові місцеперебування програм і повертає словник"""
     programs = {}
     start_menu_dirs = _get_start_menu_dirs()
 
@@ -158,7 +166,7 @@ def _scan_programs():
 
 
 async def find_installed_programs():
-    """Finds installed programs and caches the result."""
+    """Знаходить завантаженні програми"""
     global _PROGRAMS_CACHE
     async with _PROGRAMS_CACHE_LOCK:
         if _PROGRAMS_CACHE is None:
@@ -170,7 +178,7 @@ async def find_installed_programs():
 
 
 async def get_location():
-    """Отримує інформацію про місцеперебування."""
+    """Отримує інформацію про місцеперебування"""
     logging.info("Attempting to get location via geocoder.")
     location = geocoder.ip(const.GEOCODER_IP_ME)
     if not location.city:
@@ -181,7 +189,7 @@ async def get_location():
 
 
 async def get_weather_info():
-    """Отримує інформацію про погоду для поточного місцеперебування."""
+    """Отримує інформацію про погоду для поточного місцеперебування"""
     settings = await load_settings()  # This is already logged in load_settings
     city = settings.get("city")
     try:
@@ -203,6 +211,7 @@ async def get_weather_info():
 
 
 def _get_news_headlines(url="", class_name=""):
+    """Отримує заголовки новин з інтернету"""
     logging.info(f"Fetching news headlines from URL: {url} with class: {class_name}")
     try:
         response = requests.get(url)
@@ -228,7 +237,7 @@ async def get_news_headlines(url="", class_name=""):
 
 
 async def _get_first_youtube_video_url(query):
-    """Searches YouTube and returns the URL of the first video result, formatted for YouTube Music."""
+    """Шукає в YouTube і повертає URL першого відео, форматує для YouTube Music."""
     try:
         search_url = f"https://www.youtube.com/results?search_query={quote_plus(query)}"
         logging.info(f"Searching YouTube with URL: {search_url}")
@@ -241,7 +250,6 @@ async def _get_first_youtube_video_url(query):
 
         html_content = response.text
 
-        # Find the script tag containing ytInitialData, which holds the search results in JSON format.
         match = re.search(r"var ytInitialData = ({.*?});", html_content)
         if not match:
             logging.error("Could not find ytInitialData in YouTube search page. The page structure may have changed.")
@@ -251,7 +259,6 @@ async def _get_first_youtube_video_url(query):
             data_str = match.group(1)
             data = json.loads(data_str)
 
-            # Navigate through the JSON to find video results. This path is subject to change by YouTube.
             video_results = \
                 data['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents']
 
@@ -298,7 +305,7 @@ async def listen(on_status_change=None):
 
 
 def _listen():
-    """Записує мову з мікрофона та розпізнає її."""
+    """Записує мову з мікрофона та розпізнає її"""
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
         logging.info("Adjusting for ambient noise.")
@@ -324,14 +331,17 @@ def _listen():
 
 async def tts(text, output=const.TTS_OUTPUT, on_status_change=None):
     loop = asyncio.get_running_loop()
+    logging.info("Avrora started talking.")
     if on_status_change:
         await on_status_change(const.STATUS_SPEAKING)
     await loop.run_in_executor(executor, _tts, text, output)
     if on_status_change:
         await on_status_change(const.STATUS_NONE)
+        logging.info("Avrora stoped talking.")
 
 
 def _tts(text, output):
+    """Озвучує текст"""
     def _speak():
         try:
             ans = gTTS(text=text, lang=const.TTS_LANGUAGE, slow=False)
@@ -340,21 +350,17 @@ def _tts(text, output):
             ans.save(output)
         except Exception as e:
             logging.error(f"Error generating or saving TTS audio: {e}")
-            # Re-raise to be caught by the outer try-except or main loop
             raise
 
     try:
         _speak()
-        # Ensure the file exists and is not empty before reading
         if not os.path.exists(output) or os.path.getsize(output) == 0:
             raise RuntimeError(f"TTS output file is missing or empty: {output}")
-        data, fs = sf.read(output, dtype='float32')  # This line can cause the unpack error if sf.read returns None
+        data, fs = sf.read(output, dtype='float32')
         sd.play(data, fs)
-        status = sd.wait()
         logging.debug(f"TTS audio played successfully from {output}")
     except Exception as e:
         logging.error(f"Error playing TTS audio from {output}: {e}")
-        # Re-raise the exception to be handled by the caller
         raise e
 
 
@@ -397,6 +403,7 @@ class TodoListManager:
 
 
 async def show_reminder(duration, reminder_text, settings, on_remind=None):
+    """Показує нагадування"""
     logging.info(f"Reminder set for '{reminder_text}' in {duration} seconds.")
     await timer(duration, reminder_text)
     response = const.RESPONSE_REMINDER_TRIGGERED.format(settings.get('name', ''), reminder_text)
@@ -407,12 +414,11 @@ async def show_reminder(duration, reminder_text, settings, on_remind=None):
 
 
 async def _schedule_alarm(alarm_time_str, settings, on_remind):
+    """Встановлює будильник на вказаний час"""
     try:
-        # Parse the time string (e.g., "7:30", "14:00")
         alarm_hour, alarm_minute = map(int, alarm_time_str.split(':'))
 
         now = datetime.now()
-        # Check for valid hour/minute range before replacing
         if not (0 <= alarm_hour <= 23 and 0 <= alarm_minute <= 59):
             raise ValueError("Година або хвилина виходить за допустимі межі (0-23 для години, 0-59 для хвилини).")
 
@@ -459,6 +465,7 @@ async def _schedule_alarm(alarm_time_str, settings, on_remind):
 
 
 async def doSomething(command, page, on_status_change=None, on_remind=None):
+    """Основний цикл обробки тексту і команд від користувача"""
     logging.info(f"Processing command: '{command}'")
     if on_status_change:
         await on_status_change(const.STATUS_THINKING)
@@ -474,7 +481,6 @@ async def doSomething(command, page, on_status_change=None, on_remind=None):
         if on_status_change:
             await on_status_change(const.STATUS_NONE)
         return 0, result_message
-
     if len(what_to_do_parts) > 1:
         what_to_do = what_to_do_parts[-1]
         logging.debug(f"Extracted task: '{what_to_do}'")
@@ -485,11 +491,9 @@ async def doSomething(command, page, on_status_change=None, on_remind=None):
         if on_status_change:
             await on_status_change(const.STATUS_NONE)
         return 1, result_message
-
     ans, result_message = await what_command(what_to_do, page, settings, on_status_change=on_status_change,
                                              on_remind=on_remind)
     logging.info(f"what_command returned: ans='{ans}', message='{result_message}'")
-
     if ans == 1:
         await tts(const.RESPONSE_CLARIFY, on_status_change=on_status_change)
         result_message = const.RESPONSE_CLARIFY
@@ -500,37 +504,37 @@ async def doSomething(command, page, on_status_change=None, on_remind=None):
         result_message = generic_responses[ans_random]
         await tts(result_message, on_status_change=on_status_change)
         ans = 0
-
     if on_status_change:
         await on_status_change(const.STATUS_NONE)
     return ans, result_message
 
 
 async def what_command(what_to_do, page, settings, on_status_change=None, on_remind=None):
+    """Визначає яку команду сказав користувач і виконує відповідні дії"""
     logging.info(f"Executing command logic for: '{what_to_do}'")
     ans = 1
     todo_manager = TodoListManager()
-    doed_something = False
-    custom_commands = await load_CC()
+    does_something = False
+    custom_commands = await load_cc()
     for com in custom_commands.keys():
-        contains_varible = False
-        varible_start = 1
-        varible_ends = 1
+        contains_variable = False
+        variable_start = 1
+        variable_ends = 1
         if "[" in com and "]" in com:
-            contains_varible = True
-            varible_start = com.find("[")
-            varible_ends = com.find("]")
+            contains_variable = True
+            variable_start = com.find("[")
+            variable_ends = com.find("]")
 
-        if what_to_do[:len(com)] == com.lower() and not contains_varible:
+        if what_to_do[:len(com)] == com.lower() and not contains_variable:
             logging.info(f"Matched custom command: '{com}'")
             await run_command(custom_commands.get(com))
-            doed_something = True
+            does_something = True
             break
-        elif what_to_do[:varible_start] == com.lower()[:varible_start] and what_to_do[varible_ends:] == com.lower()[
-                                                                                                        varible_ends:] and contains_varible:
-            varible = what_to_do[varible_start:varible_ends]
+        elif what_to_do[:variable_start] == com.lower()[:variable_start] and what_to_do[variable_ends:] == com.lower()[
+                                                                                                           variable_ends:] and contains_variable:
+            varible = what_to_do[variable_start:variable_ends]
             try:
-                if com.lower()[varible_start + 1:varible_ends] == const.CUSTOM_COMMAND_VAR_NUM:
+                if com.lower()[variable_start + 1:variable_ends] == const.CUSTOM_COMMAND_VAR_NUM:
                     varible = int(varible)
             except Exception as e:
                 logging.error(f"Error processing variable for custom command '{com}': {e}", exc_info=True)
@@ -542,8 +546,8 @@ async def what_command(what_to_do, page, settings, on_status_change=None, on_rem
             act = custom_commands.get(com).replace(const.CUSTOM_COMMAND_VAR_STR, varible)
             await run_command(act)
             logging.info(f"Matched custom command with variable: '{com}', executing: '{act}'")
-            doed_something = True
-    if doed_something:
+            does_something = True
+    if does_something:
         ans = 0
         await tts(const.RESPONSE_CUSTOM_COMMAND_EXECUTING.format(settings.get('name', '')),
                   on_status_change=on_status_change)
@@ -563,28 +567,28 @@ async def what_command(what_to_do, page, settings, on_status_change=None, on_rem
         program = what_to_do[len(const.CMD_OPEN):]
         if "youtube" in program:
             webbrowser.open(const.YOUTUBE_URL)
-            doed_something = True
+            does_something = True
 
         elif "telegram" in program:
             if settings.get("tgo"):
                 webbrowser.open(const.TELEGRAM_WEB_URL)
             else:
                 os.startfile(settings.get("tgpath"))
-            doed_something = True
+            does_something = True
 
         elif "gemini" in program:
             webbrowser.open_new_tab(const.GEMINI_URL)
-            doed_something = True
+            does_something = True
 
         elif any(term in program for term in ["chat gpt", "chatgpt", "чат гпт", "чат gpt"]):
             webbrowser.open_new_tab(const.CHATGPT_URL)
-            doed_something = True
+            does_something = True
 
         elif "музику" in program:
             webbrowser.open(settings.get("music"))
-            doed_something = True
+            does_something = True
 
-        if doed_something:
+        if does_something:
             await tts(const.RESPONSE_OPENING.format(settings.get('name', '')), on_status_change=on_status_change)
             ans = 0
             return ans, const.RESPONSE_OPENING.format(settings.get('name', ''))
@@ -755,22 +759,22 @@ async def what_command(what_to_do, page, settings, on_status_change=None, on_rem
         logging.info(f"Executing 'move cursor' command: {direction}")
         logging.info("trying to move cursor")
         cursor_pos = pyautogui.position()
-        doed_something = False
+        does_something = False
         if direction == const.CMD_PARAM_UP:
             pyautogui.moveTo(cursor_pos.x, cursor_pos.y + 100, 0.01)
-            doed_something = True
+            does_something = True
             logging.info("moved cursor up")
         elif direction == const.CMD_PARAM_DOWN:
             pyautogui.moveTo(cursor_pos.x, cursor_pos.y - 100, 0.01)
-            doed_something = True
+            does_something = True
             logging.info("moved cursor down")
         elif direction == const.CMD_PARAM_LEFT:
             pyautogui.moveTo(cursor_pos.x - 100, cursor_pos.y, 0.01)
-            doed_something = True
+            does_something = True
             logging.info("moved cursor left")
         elif direction == const.CMD_PARAM_RIGHT:
             pyautogui.moveTo(cursor_pos.x + 100, cursor_pos.y, 0.01)
-            doed_something = True
+            does_something = True
             logging.info("moved cursor right")
         else:
             response = const.RESPONSE_UNKNOWN_DIRECTION.format(settings.get('name', ''))
@@ -778,7 +782,7 @@ async def what_command(what_to_do, page, settings, on_status_change=None, on_rem
             ans = 0
             return ans, response
 
-        if doed_something:
+        if does_something:
             response = const.RESPONSE_MOVING_CURSOR.format(settings.get('name', ''))
             await tts(response, on_status_change=on_status_change)
             ans = 0
@@ -1019,8 +1023,8 @@ async def what_command(what_to_do, page, settings, on_status_change=None, on_rem
     elif what_to_do.startswith(const.CMD_GET_DATE):
         logging.info("Executing 'get date' command.")
         current_datetime = datetime.now()
-        dayOfWeek = const.DAYS_OF_WEEK_UK[current_datetime.weekday()]
-        response = const.RESPONSE_CURRENT_DATE.format(settings.get('name', ''), dayOfWeek, current_datetime.day,
+        day_of_week = const.DAYS_OF_WEEK_UK[current_datetime.weekday()]
+        response = const.RESPONSE_CURRENT_DATE.format(settings.get('name', ''), day_of_week, current_datetime.day,
                                                       current_datetime.month, current_datetime.year)
         await tts(response, on_status_change=on_status_change)
         ans = 0

@@ -153,7 +153,6 @@ class UI:
         self.page.theme = ft.Theme(color_scheme_seed=accent_color, font_family=const.FONT_FAMILY)
         self.page.dark_theme = ft.Theme(color_scheme_seed=accent_color, font_family=const.FONT_FAMILY)
 
-
         self.page.theme_mode = ft.ThemeMode.DARK if self.settings.get("theme") == "dark" else ft.ThemeMode.LIGHT
 
         self.settingsMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(0, -0.23),
@@ -383,7 +382,7 @@ class UI:
         self.selectTGFile.update()
 
         self.CCmDropdownOptions = [ft.dropdown.Option("", text=const.NEW_COMMAND_LABEL)]
-        for key in (await avroraCore.load_CC()).keys():
+        for key in (await avroraCore.load_cc()).keys():
             self.CCmDropdownOptions.append(ft.dropdown.Option(key, text=key))
 
         self.CCmDropdown.options = self.CCmDropdownOptions
@@ -448,9 +447,7 @@ class UI:
         self.settings['theme'] = new_theme_str
         await avroraCore.save_settings(self.settings)
 
-
         await self.wait_for_theme_initialization()
-
 
         self.update_chat_from_history()
         await self.apply_and_update_theme()
@@ -468,9 +465,7 @@ class UI:
         self.settings['accent_color'] = color_value
         await avroraCore.save_settings(self.settings)
 
-
         await self.wait_for_theme_initialization()
-
 
         self.update_chat_from_history()
         self.page.update()
@@ -505,7 +500,7 @@ class UI:
     async def delete_CC(self, e):
         command_to_delete = self.CCmDropdown.value
         logging.warning(f"Attempting to delete custom command: '{command_to_delete}'")
-        temp = await avroraCore.load_CC()
+        temp = await avroraCore.load_cc()
         json_file = {}
         for key in temp.keys():
             if key == self.CCmDropdown.value:
@@ -514,7 +509,7 @@ class UI:
         self.CCmNameI.value = ""
         self.CCmActionI.value = ""
         self.CCmDropdown.value = self.CCmDropdownOptions[0]
-        await avroraCore.save_CC(json_file)
+        await avroraCore.save_cc(json_file)
         logging.info(f"Successfully deleted custom command: '{command_to_delete}'")
         self.CCmActionI.update()
         self.CCmNameI.update()
@@ -537,7 +532,7 @@ class UI:
         chosen_command = self.CCmDropdown.value
         logging.info(f"Custom command chosen from dropdown: '{chosen_command}'")
         self.CCmNameI.value = self.CCmDropdown.value
-        self.CCmActionI.value = (await avroraCore.load_CC()).get(self.CCmDropdown.value)
+        self.CCmActionI.value = (await avroraCore.load_cc()).get(self.CCmDropdown.value)
         self.page.update()
 
     async def animateStatus(self, status):
@@ -576,7 +571,6 @@ class UI:
             if color_scheme is None:
                 raise AttributeError("Color scheme is None")
 
-
             if user == const.USER_ROLE:
                 bubble_color = color_scheme.primary_container
                 text_color = color_scheme.on_primary_container
@@ -599,7 +593,6 @@ class UI:
             else:
                 bubble_color = fallback_colors["system_bubble"]
                 text_color = fallback_colors["system_text"]
-
 
         url_pattern = re.compile(r"https?://\S+")
         spans = []
@@ -655,8 +648,8 @@ class UI:
                         size=15), ft.Row(controls=[ft.Icon(weather_icon, size=35, tooltip=weather_type)], spacing=20),
                 ft.Row(controls=[ft.Icon(const.THERMOSTAT_ICON, size=35, tooltip="Температура"),
                                  ft.Text(f": {temperature}℃", size=35, text_align=const.ALIGN_LEFT)]),
-                ft.Text(f"{weather_type}, температура {temperature}℃", size=15, text_align=const.ALIGN_LEFT)], spacing=10),
-                expand=True, expand_loose=True)
+                ft.Text(f"{weather_type}, температура {temperature}℃", size=15, text_align=const.ALIGN_LEFT)],
+                spacing=10), expand=True, expand_loose=True)
 
             new_message = ft.Row(alignment=alignment, controls=[
                 ft.Container(content=ft.Column(controls=[author, forecast_sample], spacing=5), bgcolor=bubble_color,
@@ -678,9 +671,9 @@ class UI:
                             url = match.group(0)
                             if start > last_end:
                                 spans.append(ft.TextSpan(text_split[i][last_end:start], ft.TextStyle(color=text_color)))
-                            spans.append(
-                                ft.TextSpan(url, ft.TextStyle(color=ft.Colors.BLUE_400, decoration=ft.TextDecoration.UNDERLINE),
-                                            url=url))
+                            spans.append(ft.TextSpan(url, ft.TextStyle(color=ft.Colors.BLUE_400,
+                                                                       decoration=ft.TextDecoration.UNDERLINE),
+                                                     url=url))
                             last_end = end
                         if last_end < len(text_split[i]):
                             spans.append(ft.TextSpan(text_split[i][last_end:], ft.TextStyle(color=text_color)))
@@ -688,8 +681,8 @@ class UI:
                     else:
                         text_widget.append(ft.Text(value=text_split[i], selectable=True, text_align=const.ALIGN_LEFT))
             new_message = ft.Row(alignment=alignment, controls=[
-                ft.Container(content=ft.Column(controls=text_widget, spacing=5), bgcolor=bubble_color,
-                             border_radius=10, padding=10, margin=5, expand=True, expand_loose=True)])
+                ft.Container(content=ft.Column(controls=text_widget, spacing=5), bgcolor=bubble_color, border_radius=10,
+                             padding=10, margin=5, expand=True, expand_loose=True)])
 
         else:
             new_message = ft.Row(alignment=alignment, controls=[
@@ -771,7 +764,7 @@ class UI:
 
     async def saveCC(self, command):
         logging.info(f"Saving custom command(s): {command}")
-        temp = await avroraCore.load_CC()
+        temp = await avroraCore.load_cc()
         for i in command:
             temp[i[0]] = i[1]
-        await avroraCore.save_CC(temp)
+        await avroraCore.save_cc(temp)
