@@ -44,6 +44,7 @@ THUNDER_STORM_ICON = ft.Icons.THUNDERSTORM
 CLOUDY_SNOWING_ICON = ft.Icons.CLOUDY_SNOWING
 FOGGY_ICON = ft.Icons.FOGGY
 THERMOSTAT_ICON = ft.Icons.DEVICE_THERMOSTAT
+SEND_ICON = ft.Icons.SEND
 
 # Core constants
 WAKE_WORD = "аврора"
@@ -198,6 +199,8 @@ ACCENT_COLOR_LABEL = "Акцентний колір"
 DEVELOPED_BY_LABEL = "#### Розроблено CHRONOiS"
 CONTACT_US_LABEL = "#### Якщо виникнуть якісь питання звяжіться з нами за допомогою телеграму: @Chronos4"
 WEATHER_HEADER_LABEL = "Прогноз погоди в місті {}"
+SEND_MSG_FIELD_LABEL = "Введіть команду..."
+SEND_BUTTON_LABEL = "Відправити"
 
 CUSTOM_COMMANDS_HELP_LABEL = """
 ### Як додати власні команди:
@@ -334,7 +337,7 @@ RESPONSE_ASSISTANT_PRESENT = "Я тут, {}"
 RESPONSE_UNKNOWN_COMMAND_AFTER_WAKE_WORD = "Не розумію команду після кодового слова, {}"
 RESPONSE_CLARIFY = "Не розумію, можете уточнити?"
 GENERIC_AFFIRMATIVE_RESPONSES = ["Секунду, {}", "Зараз, {}", "Звісно, {}"]
-RESPONSE_WHO_ARE_YOU = "{}, я голосовий помічник AVRORA що розшифровується як " + APP_FULL_NAME + ", чим я можу вам вам допомогти?"
+RESPONSE_WHO_ARE_YOU = "{}, я голосовий помічник AVRORA що розшифровується як " + APP_FULL_NAME + ", чим я можу вам допомогти?"
 RESPONSE_RESTARTING_APP = "Перезавантажуюся, {}"
 RESPONSE_GREETING = "Вітаю, {}, все готово до роботи"
 RESPONSE_GOODBYE = "До побачення, {}"

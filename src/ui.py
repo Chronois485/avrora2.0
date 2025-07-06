@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+import random
 import re
 import time
 
@@ -102,7 +103,7 @@ class UI:
         self.page.bgcolor = const.COLORS_DARK["MAINBGCOLOR"]
         self.page.title = const.APP_NAME
 
-        self.firstLaunchL = ft.Text(value=const.FIRST_LAUNCH_LABEL, size=20, text_align="center", width=350)
+        self.firstLaunchL = ft.Text(value=const.FIRST_LAUNCH_LABEL, size=20, text_align=const.ALIGN_CENTER, width=350)
         self.firstLaunchI = ft.TextField(label=const.FIRST_LAUNCH_INPUT_LABEL, value="", width=300)
 
         confirm_button = ft.ElevatedButton(text=const.FIRST_LAUNCH_CONFIRM_BUTTON,
@@ -187,17 +188,27 @@ class UI:
         self.infoMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(-2.08, -0.23),
                                      bgcolor=const.INITIATION_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
                                      animate_offset=ft.Animation(250), padding=10)
-        self.nameTlow = ft.Text(value=const.APP_FULL_NAME, text_align="center", width=160, size=10)
-        self.nameT = ft.Text(value=const.APP_NAME, text_align="center", width=160, size=29)
+        self.nameTlow = ft.Text(value=const.APP_FULL_NAME, text_align=const.ALIGN_CENTER, width=160, size=10)
+        self.nameT = ft.Text(value=const.APP_NAME, text_align=const.ALIGN_CENTER, width=160, size=29)
         self.nameCol = ft.Column(spacing=10, controls=[self.nameT, self.nameTlow, self.statusIcon])
         self.infoMenu.content = ft.Column(
             controls=[self.infoHeader, self.infoTable, self.infoMenuDivider, self.multipleCommandsHelp,
                       self.infoMenuDivider, self.customCommandsHelp, self.infoMenuDivider, self.conntactUsHelp,
                       self.infoMenuDivider, self.madeByHelp], scroll=const.SCROLL_MODE_AUTO)
         self.msgs = list()
-        self.msgsCol = ft.Column(controls=self.msgs, scroll=const.SCROLL_MODE_AUTO)
-        self.msgsBox = ft.Container(content=self.msgsCol, width=420, height=420)
-        self.chatCol = ft.Column(controls=[self.msgsBox], scroll=const.SCROLL_MODE_AUTO)
+        self.msgsCol = ft.Column(controls=self.msgs, scroll=const.SCROLL_MODE_AUTO, expand=True)
+        self.msgsBox = ft.Container(content=self.msgsCol, width=420, expand=True)
+
+        self.chat_input = ft.TextField(hint_text=const.SEND_MSG_FIELD_LABEL, expand=True,
+            on_submit=self.handle_text_command, border_radius=20, )
+
+        self.send_button = ft.IconButton(icon=const.SEND_ICON, icon_size=20, tooltip=const.SEND_BUTTON_LABEL,
+            on_click=self.handle_text_command, )
+
+        self.input_row = ft.Row(controls=[self.chat_input, self.send_button],
+                                vertical_alignment=ft.CrossAxisAlignment.CENTER)
+
+        self.chatCol = ft.Column(controls=[self.msgsBox, self.input_row], expand=True)
         self.chat = ft.Container(width=420, height=420, content=self.chatCol, offset=ft.Offset(-0.005, -0.09))
 
         self.TGPath = ft.Text(value=f"{const.TG_PATH_LABEL_PREFIX}{self.settings.get('tgpath')}", width=350)
@@ -243,7 +254,8 @@ class UI:
                                               on_click=lambda _: self.file_picker.pick_files(allow_multiple=False,
                                                                                              allowed_extensions=const.ALLOWED_EXTENSIONS_EXE))
 
-        self.passiveL = ft.TextField(value=const.SETTINGS_LABEL, text_align="center", border_width=0, border_radius=10)
+        self.passiveL = ft.TextField(value=const.SETTINGS_LABEL, text_align=const.ALIGN_CENTER, border_width=0,
+                                     border_radius=10)
 
         self.infoB = ft.IconButton(icon=const.INFO_ICON, icon_size=20, tooltip="Команди", on_click=self.openInfo,
                                    offset=ft.Offset(0, -1))
@@ -251,7 +263,7 @@ class UI:
         self.settingsB = ft.IconButton(icon=const.SETTINGS_ICON, icon_size=20, tooltip="Налаштування",
                                        on_click=self.openSettings, offset=ft.Offset(0, -1))
 
-        self.CCmLabel = ft.TextField(value=const.CUSTOM_COMMANDS_LABEL, text_align="center", border_width=0,
+        self.CCmLabel = ft.TextField(value=const.CUSTOM_COMMANDS_LABEL, text_align=const.ALIGN_CENTER, border_width=0,
                                      border_radius=10, disabled=True)
 
         self.CCmDropdownOptions = [ft.dropdown.Option("", text=const.NEW_COMMAND_LABEL)]
@@ -271,7 +283,8 @@ class UI:
 
         self.CCmCancelB = ft.ElevatedButton(text=const.CANCEL_CC_LABEL, width=180, height=30, on_click=self.close_CCm)
 
-        self.CCmButtonsRow = ft.Row(spacing=20, controls=[self.CCmSubmitB, self.CCmCancelB], alignment="center")
+        self.CCmButtonsRow = ft.Row(spacing=20, controls=[self.CCmSubmitB, self.CCmCancelB],
+                                    alignment=const.ALIGN_CENTER)
 
         self.CCmCol = ft.Column(spacing=10, controls=[self.CCmLabel, self.CCmDropdown, self.CCmNameI, self.CCmActionI,
                                                       self.CCmDeleteB, self.CCmButtonsRow])
@@ -284,15 +297,15 @@ class UI:
                                          on_click=self.open_CCm)
 
         self.settingsDivider = ft.Divider(height=1, thickness=2)
-        self.settingsGroupTG = ft.Text(value=const.SETTINGS_GROUP_TG_LABEL, size=20, text_align="center")
+        self.settingsGroupTG = ft.Text(value=const.SETTINGS_GROUP_TG_LABEL, size=20, text_align=const.ALIGN_CENTER)
         self.settingsGroupPersonalInfo = ft.Text(value=const.SETTINGS_GROUP_PERSONAL_INFO_LABEL, size=20,
-                                                 text_align="center")
+                                                 text_align=const.ALIGN_CENTER)
         self.settingsGroupPermissions = ft.Text(value=const.SETTINGS_GROUP_PERMISSIONS_LABEL, size=20,
-                                                text_align="center")
-        self.settingsGroupChat = ft.Text(value=const.SETTINGS_GROUP_CHAT_LABEL, size=20, text_align="center")
-        self.settingsGroupCC = ft.Text(value=const.SETTINGS_GROUP_CC_LABEL, size=20, text_align="center")
+                                                text_align=const.ALIGN_CENTER)
+        self.settingsGroupChat = ft.Text(value=const.SETTINGS_GROUP_CHAT_LABEL, size=20, text_align=const.ALIGN_CENTER)
+        self.settingsGroupCC = ft.Text(value=const.SETTINGS_GROUP_CC_LABEL, size=20, text_align=const.ALIGN_CENTER)
         self.settingsGroupPersonalisation = ft.Text(value=const.SETTINGS_GROUP_PERSONALISATION_LABEL, size=20,
-                                                    text_align="center")
+                                                    text_align=const.ALIGN_CENTER)
 
         self.settingsCol = ft.Column(spacing=10,
                                      controls=[self.passiveL, self.settingsGroupPersonalInfo, self.YourNameI,
@@ -768,3 +781,28 @@ class UI:
         for i in command:
             temp[i[0]] = i[1]
         await avroraCore.save_cc(temp)
+
+    async def handle_text_command(self, e):
+        """Обробляє команди, введені в текстове поле."""
+        command_text = self.chat_input.value.strip()
+        if not command_text:
+            return
+        self.chat_input.value = ""
+        await self.addToChat(command_text, const.USER_ROLE)
+        logging.info(f"Text command received: {command_text}.")
+        ans, result_message = await avroraCore.what_command(command_text.lower(), self.page, self.settings)
+
+        logging.info(f"what_command returned: ans='{ans}', message='{result_message}'")
+        if ans == 1:
+            await avroraCore.tts(const.RESPONSE_CLARIFY, on_status_change=None)
+            result_message = const.RESPONSE_CLARIFY
+        elif ans == "standard":
+            ans_random = random.randint(0, 2)
+            generic_responses = [resp.format(self.settings.get('name', '')) for resp in
+                                 const.GENERIC_AFFIRMATIVE_RESPONSES]
+            logging.info("Standard response sent.")
+            result_message = generic_responses[ans_random]
+            await avroraCore.tts(result_message, on_status_change=None)
+        await  self.addToChat(result_message, const.PROGRAM_ROLE)
+
+        self.page.update()

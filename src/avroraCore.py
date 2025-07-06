@@ -464,7 +464,6 @@ async def _schedule_alarm(alarm_time_str, settings, on_remind):
         logging.error(f"Unexpected error in _schedule_alarm: {e} for time string '{alarm_time_str}'")
         await tts(const.RESPONSE_ALARM_ERROR_UNKNOWN.format(e), on_status_change=None)
 
-
 async def doSomething(command, page, on_status_change=None, on_remind=None):
     """Основний цикл обробки тексту і команд від користувача"""
     logging.info(f"Processing command: '{command}'")
