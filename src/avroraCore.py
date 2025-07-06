@@ -26,6 +26,7 @@ from gtts import gTTS
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
 import constants as const
+from constants import CMD_CHANGE_ACCENT_COLOR
 
 executor = ThreadPoolExecutor(max_workers=const.MAX_WORKERS)
 
@@ -87,7 +88,7 @@ def _load_settings(filename):
     """Завантажує налаштування"""
     defaults = {"name": const.DEFAULT_NAME, "tgo": False, "tgpath": const.DEFAULT_TG_PATH,
                 "music": const.DEFAULT_MUSIC_LINK, "pcpower": False, "city": const.DEFAULT_CITY, "num_headlines": 5,
-                "theme": const.DEFAULT_THEME}
+                "theme": const.DEFAULT_THEME, "silentmode": False}
     if os.path.exists(filename):
         try:
             with open(filename, "r", encoding="utf-8") as file:
@@ -330,14 +331,18 @@ def _listen():
 
 
 async def tts(text, output=const.TTS_OUTPUT, on_status_change=None):
-    loop = asyncio.get_running_loop()
-    logging.info("Avrora started talking.")
-    if on_status_change:
-        await on_status_change(const.STATUS_SPEAKING)
-    await loop.run_in_executor(executor, _tts, text, output)
-    if on_status_change:
-        await on_status_change(const.STATUS_NONE)
-        logging.info("Avrora stoped talking.")
+    settings = await load_settings()
+    if not settings.get("silentmode", ""):
+        loop = asyncio.get_running_loop()
+        logging.info("Avrora started talking.")
+        if on_status_change:
+            await on_status_change(const.STATUS_SPEAKING)
+        await loop.run_in_executor(executor, _tts, text, output)
+        if on_status_change:
+            await on_status_change(const.STATUS_NONE)
+            logging.info("Avrora stoped talking.")
+    else:
+        logging.info("Silent mode is open, stopping voice")
 
 
 def _tts(text, output):
@@ -464,7 +469,8 @@ async def _schedule_alarm(alarm_time_str, settings, on_remind):
         logging.error(f"Unexpected error in _schedule_alarm: {e} for time string '{alarm_time_str}'")
         await tts(const.RESPONSE_ALARM_ERROR_UNKNOWN.format(e), on_status_change=None)
 
-async def doSomething(command, page, on_status_change=None, on_remind=None):
+
+async def doSomething(command, ui_instance, page, on_status_change=None, on_remind=None):
     """Основний цикл обробки тексту і команд від користувача"""
     logging.info(f"Processing command: '{command}'")
     if on_status_change:
@@ -491,7 +497,7 @@ async def doSomething(command, page, on_status_change=None, on_remind=None):
         if on_status_change:
             await on_status_change(const.STATUS_NONE)
         return 1, result_message
-    ans, result_message = await what_command(what_to_do, page, settings, on_status_change=on_status_change,
+    ans, result_message = await what_command(what_to_do, ui_instance, page, settings, on_status_change=on_status_change,
                                              on_remind=on_remind)
     logging.info(f"what_command returned: ans='{ans}', message='{result_message}'")
     if ans == 1:
@@ -509,7 +515,7 @@ async def doSomething(command, page, on_status_change=None, on_remind=None):
     return ans, result_message
 
 
-async def what_command(what_to_do, page, settings, on_status_change=None, on_remind=None):
+async def what_command(what_to_do, ui_instance, page, settings, on_status_change=None, on_remind=None):
     """Визначає яку команду сказав користувач і виконує відповідні дії"""
     logging.info(f"Executing command logic for: '{what_to_do}'")
     ans = 1
@@ -1133,6 +1139,104 @@ async def what_command(what_to_do, page, settings, on_status_change=None, on_rem
         else:
             response = const.RESPONSE_CLARIFY.format(settings.get('name', ''))
             ans = 0
+        await tts(response, on_status_change=on_status_change)
+        return ans, response
+    elif what_to_do.startswith(const.CMD_CLEAR_CHAT):
+        logging.info("Executing 'clear chat' command.")
+        ui_instance.clearChat(None)
+        await tts(const.GENERIC_AFFIRMATIVE_RESPONSES[3].format(settings.get('name', '')),
+                  on_status_change=on_status_change)
+        ans = 0
+        return ans, ""
+    elif what_to_do.startswith(const.CMD_NAME_ME):
+        logging.info("Executing 'name me' command.")
+        name = what_to_do[len(const.CMD_NAME_ME):].strip()
+        if not name:
+            response = const.RESPONSE_CLARIFY.format(settings.get('name', ''))
+            ans = 0
+        else:
+            ui_instance.YourNameI.value = name
+            await ui_instance.update_settings(None)
+            page.update()
+            response = const.RESPONSE_NEW_NAME.format(settings.get('name', ''))
+            ans = 0
+        await tts(response, on_status_change=on_status_change)
+        return ans, response
+    elif what_to_do.startswith(const.CMD_I_AM_IN_CITY):
+        logging.info("Executing 'i am in city' command.")
+        city = what_to_do[len(const.CMD_I_AM_IN_CITY):].strip()
+        if not city:
+            response = const.RESPONSE_CLARIFY.format(settings.get('name', ''))
+            ans = 0
+        else:
+            ui_instance.CityI.value = city
+            await ui_instance.update_settings(None)
+            page.update()
+            response = const.RESPONSE_REMEMBERED.format(settings.get('name', ''))
+            ans = 0
+        await tts(response, on_status_change=on_status_change)
+        return ans, response
+    elif what_to_do.startswith(const.CMD_SILENT_MODE_ON):
+        logging.info("Executing 'silent mode on' command.")
+        ui_instance.silentModeCB.value = True
+        await ui_instance.update_settings(None)
+        page.update()
+        response = const.RESPONSE_CHANGE_SETTINGS.format(settings.get('name', ''))
+        ans = 0
+        return ans, response
+    elif what_to_do.startswith(const.CMD_SILENT_MODE_OFF):
+        logging.info("Executing 'silent mode off' command.")
+        ui_instance.silentModeCB.value = False
+        await ui_instance.update_settings(None)
+        page.update()
+        response = const.RESPONSE_CHANGE_SETTINGS.format(settings.get('name', ''))
+        ans = 0
+        await tts(response, on_status_change=on_status_change)
+        return ans, response
+    elif what_to_do.startswith(const.CMD_SET_NUM_OF_HEADLINES):
+        logging.info("Executing 'set num of headlines' command.")
+        num = what_to_do[len(const.CMD_SET_NUM_OF_HEADLINES):].strip()
+        if not num:
+            response = const.RESPONSE_CLARIFY.format(settings.get('name', ''))
+            ans = 0
+        else:
+            try:
+                if ui_instance.NewsHeadersCountS.min <= int(num) <= ui_instance.NewsHeadersCountS.max + 1:
+                    ui_instance.NewsHeadersCountS.value = int(num)
+                else:
+                    raise ValueError("Кількість новин має бути між 1 і 10.")
+            except:
+                await tts(const.RESPONSE_CLARIFY)
+                ans = 0
+                return ans, const.RESPONSE_CLARIFY
+            await ui_instance.update_settings(None)
+            page.update()
+            response = const.RESPONSE_CHANGE_SETTINGS.format(settings.get('name', ''))
+            ans = 0
+        await tts(response, on_status_change=on_status_change)
+        return ans, response
+    elif what_to_do.startswith(const.CMD_CHANGE_THEME):
+        logging.info("Executing 'change theme' command.")
+        ui_instance.themeS.value = not ui_instance.themeS.value
+        await ui_instance.update_settings(None)
+        await ui_instance.switch_theme(None)
+        page.update()
+        response = const.RESPONSE_CHANGE_SETTINGS.format(settings.get('name', ''))
+        ans = 0
+        await tts(response, on_status_change=on_status_change)
+        return ans, response
+    elif what_to_do.startswith(CMD_CHANGE_ACCENT_COLOR):
+        logging.info("Executing 'change accent color' command.")
+        next_color = const.ACCENT_COLORS_LIST[const.ACCENT_COLORS_LIST.index(
+            ui_instance.accent_color_dropdown.value) + 1] if const.ACCENT_COLORS_LIST.index(
+            ui_instance.accent_color_dropdown.value) + 1 != len(const.ACCENT_COLORS_LIST) else const.ACCENT_COLORS_LIST[
+            0]
+        ui_instance.accent_color_dropdown.value = next_color
+        await ui_instance.update_settings(None)
+        await ui_instance.switch_accent_color(None)
+        page.update()
+        response = const.RESPONSE_CHANGE_SETTINGS.format(settings.get('name', ''))
+        ans = 0
         await tts(response, on_status_change=on_status_change)
         return ans, response
 

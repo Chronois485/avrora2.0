@@ -156,7 +156,7 @@ class UI:
 
         self.page.theme_mode = ft.ThemeMode.DARK if self.settings.get("theme") == "dark" else ft.ThemeMode.LIGHT
 
-        self.settingsMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(0, -0.23),
+        self.settingsMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(0, -0.20),
                                          bgcolor=const.INITIATION_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
                                          animate_offset=ft.Animation(250), padding=10)
 
@@ -185,7 +185,7 @@ class UI:
 
         self.infoMenuDivider = ft.Divider(height=1, thickness=2)
 
-        self.infoMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(-2.08, -0.23),
+        self.infoMenu = ft.Container(width=420, height=510, border_radius=10, offset=ft.Offset(-2.08, -0.20),
                                      bgcolor=const.INITIATION_COLOR, border=ft.border.all(2, ft.Colors.PRIMARY),
                                      animate_offset=ft.Animation(250), padding=10)
         self.nameTlow = ft.Text(value=const.APP_FULL_NAME, text_align=const.ALIGN_CENTER, width=160, size=10)
@@ -209,7 +209,7 @@ class UI:
                                 vertical_alignment=ft.CrossAxisAlignment.CENTER)
 
         self.chatCol = ft.Column(controls=[self.msgsBox, self.input_row], expand=True)
-        self.chat = ft.Container(width=420, height=420, content=self.chatCol, offset=ft.Offset(-0.005, -0.09))
+        self.chat = ft.Container(width=420, height=455, content=self.chatCol, offset=ft.Offset(-0.005, -0.049))
 
         self.TGPath = ft.Text(value=f"{const.TG_PATH_LABEL_PREFIX}{self.settings.get('tgpath')}", width=350)
 
@@ -240,12 +240,18 @@ class UI:
                                          label_position=ft.LabelPosition.LEFT, on_change=self.update_settings)
         self.clearChatButton = ft.ElevatedButton(text=const.CLEAR_CHAT_BUTTON_LABEL, width=200, height=30,
                                                  on_click=self.clearChat)
+
+        self.silentModeCB = ft.Checkbox(label=const.SILENT_MODE_CHECKBOX_LABEL,
+                                        value=self.settings.get("silentmode"),
+                                        label_position=ft.LabelPosition.RIGHT,
+                                        on_change=self.update_settings)
+
         self.resetSettingsButton = ft.ElevatedButton(text=const.RESET_SETTINGS_BUTTON_LABEL, width=200, height=30,
                                                      on_click=self.resetSettings)
 
         self.permisionsToControlPCPowerCB = ft.Checkbox(label=const.PERMISSIONS_TO_CONTROL_PC_POWER_LABEL,
                                                         value=self.settings.get("pcpower"),
-                                                        label_position=ft.LabelPosition.LEFT,
+                                                        label_position=ft.LabelPosition.RIGHT,
                                                         on_change=self.update_settings)
 
         self.file_picker = ft.FilePicker(on_result=self.on_file_selected)
@@ -316,7 +322,7 @@ class UI:
                                                self.TGPath, self.selectTGFile, self.useTGOnlineCB, self.settingsDivider,
                                                self.settingsGroupPermissions, self.permisionsToControlPCPowerCB,
                                                self.resetSettingsButton, self.settingsDivider, self.settingsGroupChat,
-                                               self.clearChatButton, self.settingsDivider, self.settingsGroupCC,
+                                               self.clearChatButton, self.silentModeCB, self.settingsDivider, self.settingsGroupCC,
                                                self.CCmOpen, self.settingsDivider], scroll="auto")
         self.settingsMenu.content = self.settingsCol
 
@@ -388,6 +394,7 @@ class UI:
         self.settings["city"] = self.CityI.value
         self.settings["num_headlines"] = int(self.NewsHeadersCountS.value)
         self.settings["theme"] = "dark" if self.themeS.value else "light"
+        self.settings["silentmode"] = self.silentModeCB.value
 
         await avroraCore.save_settings(self.settings)
 
@@ -405,11 +412,11 @@ class UI:
         if not self.settings_is_open and not self.info_is_open:
             logging.info("Opening settings menu.")
             self.infoB.disabled = True
-            self.settingsMenu.offset = ft.Offset(-2.054, -0.23)
+            self.settingsMenu.offset = ft.Offset(-2.054, -0.20)
             self.settings_is_open = True
         else:
             logging.info("Closing settings menu.")
-            self.settingsMenu.offset = ft.Offset(-1.03, -0.23)
+            self.settingsMenu.offset = ft.Offset(-1.03, -0.20)
             self.settings_is_open = False
             self.infoB.disabled = False
         self.page.update()
@@ -417,12 +424,12 @@ class UI:
     def openInfo(self, e):
         if not self.info_is_open and not self.settings_is_open:
             logging.info("Opening info menu.")
-            self.infoMenu.offset = ft.Offset(-1.029, -0.23)
+            self.infoMenu.offset = ft.Offset(-1.029, -0.20)
             self.info_is_open = True
             self.settingsB.disabled = True
         else:
             logging.info("Closing info menu.")
-            self.infoMenu.offset = ft.Offset(-2.08, -0.23)
+            self.infoMenu.offset = ft.Offset(-2.08, -0.20)
             self.info_is_open = False
             self.settingsB.disabled = False
         self.page.update()
@@ -438,6 +445,7 @@ class UI:
         self.musicLinkI.value = ""
         self.permisionsToControlPCPowerCB.value = False
         self.CityI.value = ""
+        self.silentModeCB.value = False
         self.NewsHeadersCountS.value = 5
         await self.update_settings(None)
         logging.info("Settings have been reset to default.")
@@ -790,7 +798,7 @@ class UI:
         self.chat_input.value = ""
         await self.addToChat(command_text, const.USER_ROLE)
         logging.info(f"Text command received: {command_text}.")
-        ans, result_message = await avroraCore.what_command(command_text.lower(), self.page, self.settings)
+        ans, result_message = await avroraCore.what_command(command_text.lower(), self, self.page, self.settings)
 
         logging.info(f"what_command returned: ans='{ans}', message='{result_message}'")
         if ans == 1:

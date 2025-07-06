@@ -24,7 +24,7 @@ async def listen(page, ui_instance):
             if text.startswith(const.WAKE_WORD):
                 await ui_instance.addToChat(text, const.USER_ROLE)
                 try:
-                    ans, result_message = await avroraCore.doSomething(text, page,
+                    ans, result_message = await avroraCore.doSomething(text, ui_instance, page,
                                                                        on_status_change=ui_instance.animateStatus,
                                                                        on_remind=ui_instance.addToChat)
                     if result_message:
@@ -56,8 +56,8 @@ async def listen(page, ui_instance):
 async def start_app_flow(page, ui_instance):
     """Запускає основний потік програми"""
     logging.info("Sending initial greeting.")
-    _, result_message = await avroraCore.doSomething(f"{const.WAKE_WORD} {const.CMD_GREETING_VARIANTS[0]}", page,
-                                                     on_status_change=ui_instance.animateStatus)
+    _, result_message = await avroraCore.doSomething(f"{const.WAKE_WORD} {const.CMD_GREETING_VARIANTS[0]}", ui_instance,
+                                                     page, on_status_change=ui_instance.animateStatus)
     await ui_instance.addToChat(result_message, const.PROGRAM_ROLE)
     await listen(page, ui_instance)
 

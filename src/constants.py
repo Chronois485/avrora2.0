@@ -24,6 +24,8 @@ ACCENT_COLORS = {"Deep Purple": ft.Colors.DEEP_PURPLE_400, "Indigo": ft.Colors.I
                  "Teal": ft.Colors.TEAL_400, "Green": ft.Colors.GREEN_400, "Orange": ft.Colors.ORANGE_400,
                  "Pink": ft.Colors.PINK_400, }
 
+ACCENT_COLORS_LIST = list(ACCENT_COLORS.keys())
+
 CHAT_FALLBACK_COLORS = {"user_bubble": ft.Colors.PRIMARY_CONTAINER, "user_text": ft.Colors.ON_PRIMARY_CONTAINER,
                         "bot_bubble": ft.Colors.SECONDARY_CONTAINER, "bot_text": ft.Colors.ON_SECONDARY_CONTAINER,
                         "system_bubble": ft.Colors.TERTIARY_CONTAINER, "system_text": ft.Colors.ON_TERTIARY_CONTAINER}
@@ -139,11 +141,11 @@ NEWS_ARTICLE_HEADER_CLASS = "article_header"
 
 # Window Settings
 WINDOW_WIDTH = 450
-WINDOW_HEIGHT = 650
+WINDOW_HEIGHT = 665
 WINDOW_MIN_WIDTH = 450
 WINDOW_MAX_WIDTH = 450
-WINDOW_MAX_HEIGHT = 650
-WINDOW_MIN_HEIGHT = 650
+WINDOW_MAX_HEIGHT = 665
+WINDOW_MIN_HEIGHT = 665
 
 # Font Paths
 TEKTUR_FONT_PATH = get_resource_path("assets/fonts/Tektur-Regular.ttf")
@@ -201,6 +203,7 @@ CONTACT_US_LABEL = "#### Якщо виникнуть якісь питання �
 WEATHER_HEADER_LABEL = "Прогноз погоди в місті {}"
 SEND_MSG_FIELD_LABEL = "Введіть команду..."
 SEND_BUTTON_LABEL = "Відправити"
+SILENT_MODE_CHECKBOX_LABEL = "Тихий режим"
 
 CUSTOM_COMMANDS_HELP_LABEL = """
 ### Як додати власні команди:
@@ -293,6 +296,14 @@ CMD_PAUSE_SONG_VARIANTS = ["пауза", "пауза трека", "пауза п
                            "постав на паузу"]
 CMD_RESUME_SONG_VARIANTS = ["віднови пісню", "віднови трек", "продовжити трек", "продовжи пісню", "зніми з паузи"]
 CMD_WRITE_TEXT = "напиши "
+CMD_SILENT_MODE_OFF = "вимкни тихий режим"
+CMD_SILENT_MODE_ON = "увімкни тихий режим"
+CMD_NAME_ME = "називай мене "
+CMD_I_AM_IN_CITY = "я в місті "
+CMD_CLEAR_CHAT = "очистити чат"
+CMD_SET_NUM_OF_HEADLINES = "встанови число заголовків на "
+CMD_CHANGE_THEME = "зміни тему"
+CMD_CHANGE_ACCENT_COLOR = "зміни колір"
 
 # Command parameters
 CMD_PARAM_UP = "вверх"
@@ -413,6 +424,9 @@ RESPONSE_WRITE_TEXT = "Написала, {}"
 RESPONSE_CUSTOM_COMMAND_EXECUTING = "Виконую, {}"
 RESPONSE_CUSTOM_COMMAND_ERROR = "Помилка з користувацькою командою, {}"
 RESPONSE_UNKNOWN_COMMAND = "Не розумію команду '{}', {}"
+RESPONSE_NEW_NAME = "Тепер буду називати вас {}"
+RESPONSE_REMEMBERED = "Запам'ятала, {}"
+RESPONSE_CHANGE_SETTINGS = "Налаштовую, {}"
 
 # Variants of commands for command table
 TABLE_VARIANTS = {"включи музику*": "ввімкни музику\nувімкни музику",
